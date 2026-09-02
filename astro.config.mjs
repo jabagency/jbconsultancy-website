@@ -18,7 +18,18 @@ import tailwindcss from '@tailwindcss/vite';
  * Settings → Pages. BASE_PATH stays "/" for the custom domain, which is also
  * what local dev and the test suite expect.
  */
-const SITE_URL = process.env.SITE_URL ?? 'https://jbconsultancy.in';
+/*
+ * Forced to https. GitHub Pages serves every site over TLS, but until "Enforce
+ * HTTPS" is ticked in Settings → Pages it reports base_url with an http scheme —
+ * and that scheme ends up in canonical tags, OG URLs and every sitemap entry,
+ * pointing search engines at the insecure form of the site. The scheme is not a
+ * deployment variable worth honouring, so it is not read from the environment.
+ * Asserted by tests/build/output.test.mjs.
+ */
+const SITE_URL = (process.env.SITE_URL ?? 'https://jbconsultancy.in').replace(
+  /^http:\/\//,
+  'https://',
+);
 const BASE_PATH = process.env.BASE_PATH ?? '/';
 
 export default defineConfig({

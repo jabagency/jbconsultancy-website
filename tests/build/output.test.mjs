@@ -89,8 +89,8 @@ describe('GitHub Pages plumbing', () => {
     // Relative Sitemap: directives are ignored, so the origin has to be baked in.
     assert.match(
       robots,
-      /^Sitemap: https?:\/\/\S+\/sitemap-index\.xml$/m,
-      'robots.txt needs an absolute Sitemap: URL',
+      /^Sitemap: https:\/\/\S+\/sitemap-index\.xml$/m,
+      'robots.txt needs an absolute https Sitemap: URL',
     );
   });
 
@@ -99,7 +99,7 @@ describe('GitHub Pages plumbing', () => {
 
     assert.match(index, /^<\?xml version="1\.0" encoding="UTF-8"\?>/, 'missing XML declaration');
     assert.match(index, /<sitemapindex\s[^>]*xmlns="http:\/\/www\.sitemaps\.org/);
-    assert.match(index, /<loc>https?:\/\/\S+\/sitemap-0\.xml<\/loc>/);
+    assert.match(index, /<loc>https:\/\/\S+\/sitemap-0\.xml<\/loc>/);
     assert.ok(index.includes('</sitemapindex>'), 'sitemapindex is not closed');
   });
 
@@ -147,6 +147,23 @@ describe('asset URLs', () => {
         !html.includes('http://localhost'),
         `${file} hard-codes http://localhost; canonical and OG URLs must come from SITE_URL`,
       );
+    }
+  });
+
+  test('every canonical and OG URL uses https', () => {
+    // GitHub Pages reports an http base_url until "Enforce HTTPS" is ticked, and
+    // that scheme would otherwise be baked into the tags search engines index.
+    // astro.config.mjs upgrades it; this is the assertion that it stayed upgraded.
+    for (const file of HTML_FILES) {
+      const html = readDist(file);
+      const tags = [
+        ...html.matchAll(/<link rel="canonical" href="([^"]+)"/g),
+        ...html.matchAll(/<meta property="og:(?:url|image)" content="([^"]+)"/g),
+      ].map((match) => match[1]);
+
+      for (const url of tags) {
+        assert.match(url, /^https:\/\//, `${file} advertises ${url} over plain http`);
+      }
     }
   });
 
