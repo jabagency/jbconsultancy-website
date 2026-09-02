@@ -4,16 +4,10 @@
  * Nothing here is duplicated in markup: components read from this module so that
  * changing a phone number or a nav label is a one-line edit in one file.
  *
- * ┌──────────────────────────────────────────────────────────────────────────┐
- * │ TODO — one placeholder value is left before going live.                  │
- * │   forms.web3formsKey free access key from https://web3forms.com          │
- * │                                                                          │
- * │ `npm test` reports it as a skipped "go-live readiness" check and warns   │
- * │ with the outstanding list; it does not fail, so the suite stays a useful │
- * │ signal. Fill the value in and its check starts enforcing immediately.    │
- * │ Until then the contact form falls back to a mailto: composer aimed at    │
- * │ contact.email — see tests/unit/site.test.ts.                             │
- * └──────────────────────────────────────────────────────────────────────────┘
+ * Every value here is real — no placeholders left. The "go-live readiness"
+ * block in tests/unit/site.test.ts now enforces all three of them (WhatsApp
+ * number, contact email, Web3Forms key) rather than skipping, so removing or
+ * emptying one fails the suite instead of silently degrading the site.
  */
 
 export interface NavItem {
@@ -65,10 +59,13 @@ export const site = {
 
   forms: {
     /**
-     * Web3Forms access key. While empty the contact form degrades to a
-     * `mailto:` composer instead of silently failing to deliver.
+     * Web3Forms access key, issued against contact.email. Public by design — it
+     * ships in the client bundle and can only ever deliver to the address it was
+     * verified for, so exposure lets someone email us, not redirect our mail.
+     * While empty the contact form degrades to a `mailto:` composer instead of
+     * silently failing to deliver.
      */
-    web3formsKey: '',
+    web3formsKey: '5e0c0e3f-49d8-4fac-8bc2-401c9e5054f8',
     endpoint: 'https://api.web3forms.com/submit',
   },
 
