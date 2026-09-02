@@ -108,7 +108,7 @@ test.describe('primary navigation', () => {
     await page.goto('/');
     await page
       .locator('header')
-      .getByRole('link', { name: /start a project/i })
+      .getByRole('link', { name: /contact us/i })
       .click();
     await page.waitForURL((url) => url.pathname === '/contact/');
     await expect(page.locator('form#contact-form')).toBeVisible();
