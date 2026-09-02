@@ -1,0 +1,166 @@
+---
+/**
+ * Site footer: brand blurb, navigation, service links and contact routes.
+ *
+ * Contact rows are rendered conditionally — a placeholder number must not become
+ * a dead `tel:` or WhatsApp link, so anything unconfigured is simply omitted.
+ */
+import Container from './Container.astro';
+import Logo from './Logo.astro';
+import Icon from '@components/ui/Icon.astro';
+import { site, isPlaceholder } from '@data/site';
+import { services } from '@data/services';
+import { href } from '@lib/url';
+import { buildWhatsAppUrl, formatPhoneForDisplay } from '@lib/whatsapp';
+
+const year = new Date().getFullYear();
+
+const emailReady = !isPlaceholder(site.contact.email);
+const whatsappUrl = buildWhatsAppUrl({
+  phone: site.contact.whatsapp,
+  message: `Hi ${site.name}, I would like to discuss a project.`,
+});
+
+const columnHeading = 'text-ink mb-4 text-xs font-semibold tracking-[0.16em] uppercase';
+const columnLink = 'text-body hover:text-accent text-[0.9375rem] transition-colors';
+---
+
+<footer class="bg-subtle border-hairline border-t">
+  <Container class="py-16 md:py-20">
+    <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
+      <div>
+        <Logo />
+        <p class="text-body mt-5 max-w-xs text-[0.9375rem] leading-relaxed">
+          {site.tagline}. An end-to-end consulting partner for fast-scaling platforms, fintech
+          disruptors and technology enterprises.
+        </p>
+
+        {
+          site.social.length > 0 && (
+            <ul class="mt-6 flex gap-3">
+              {site.social.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="border-hairline text-body hover:border-accent/40 hover:text-accent inline-flex size-11 items-center justify-center rounded-full border transition-colors"
+                    aria-label={`${site.name} on ${link.label} (opens in a new tab)`}
+                  >
+                    <Icon name="linkedin" size={18} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+
+      <nav aria-label="Footer">
+        <h2 class={columnHeading}>Company</h2>
+        <ul class="flex flex-col gap-3">
+          {
+            site.nav.map((item) => (
+              <li>
+                <a href={href(item.href)} class={columnLink}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav aria-label="Services">
+        <h2 class={columnHeading}>Services</h2>
+        <ul class="flex flex-col gap-3">
+          {
+            services.map((service) => (
+              <li>
+                <a href={href(`/services/#${service.slug}`)} class={columnLink}>
+                  {service.title.replace(' & Specialised Staffing', '').replace(' Engineering', '')}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class={columnHeading}>Get in touch</h2>
+        <ul class="flex flex-col gap-3">
+          {
+            emailReady && (
+              <li>
+                <a
+                  href={`mailto:${site.contact.email}`}
+                  class={`${columnLink} inline-flex items-center gap-2.5`}
+                >
+                  <Icon name="mail" size={16} class="shrink-0 opacity-60" />
+                  {site.contact.email}
+                </a>
+              </li>
+            )
+          }
+          {
+            site.contact.phone.length > 0 && (
+              <li>
+                <a
+                  href={`tel:${site.contact.phone.replace(/\D/g, '')}`}
+                  class={`${columnLink} inline-flex items-center gap-2.5`}
+                >
+                  <Icon name="phone" size={16} class="shrink-0 opacity-60" />
+                  {formatPhoneForDisplay(site.contact.phone)}
+                </a>
+              </li>
+            )
+          }
+          {
+            whatsappUrl && (
+              <li>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`${columnLink} inline-flex items-center gap-2.5`}
+                >
+                  <Icon name="whatsapp" size={16} class="shrink-0 opacity-60" />
+                  WhatsApp
+                  <span class="sr-only">(opens in a new tab)</span>
+                </a>
+              </li>
+            )
+          }
+          <li>
+            <a href={href('/contact/')} class={`${columnLink} inline-flex items-center gap-2.5`}>
+              <Icon name="arrow-right" size={16} class="shrink-0 opacity-60" />
+              Send an enquiry
+            </a>
+          </li>
+        </ul>
+
+        {
+          site.contact.addressLines.length > 0 && (
+            <address class="text-body mt-5 flex gap-2.5 text-[0.9375rem] not-italic">
+              <Icon name="map-pin" size={16} class="mt-1 shrink-0 opacity-60" />
+              <span>
+                {site.contact.addressLines.map((line) => (
+                  <span class="block">{line}</span>
+                ))}
+              </span>
+            </address>
+          )
+        }
+      </div>
+    </div>
+
+    <hr class="rule-fade my-10" />
+
+    <div
+      class="text-muted flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>&copy; {year} {site.legalName}. All rights reserved.</p>
+      <p>Established {site.foundedYear}</p>
+    </div>
+  </Container>
+</footer>

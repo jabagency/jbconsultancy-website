@@ -1,0 +1,200 @@
+---
+/**
+ * Sticky site header.
+ *
+ * The mobile menu is a native <dialog> opened with showModal(). That buys focus
+ * trapping, Esc-to-close and inert page content from the platform, instead of
+ * several dozen lines of hand-rolled focus management that would need its own
+ * tests to stay correct.
+ */
+import Logo from './Logo.astro';
+import Button from '@components/ui/Button.astro';
+import Icon from '@components/ui/Icon.astro';
+import { site } from '@data/site';
+import { href, isActivePath, stripBase } from '@lib/url';
+
+const currentPath = stripBase(Astro.url.pathname);
+
+const linkBase =
+  'relative text-[0.9375rem] font-medium transition-colors duration-200 ' +
+  'hover:text-accent py-2';
+
+/** Underline the active item with the brand gradient. */
+const activeMarker =
+  'after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full ' +
+  'after:rounded-full after:bg-gradient-brand after:content-[""]';
+---
+
+<header
+  id="site-header"
+  class="bg-surface/85 border-hairline/0 sticky top-0 z-50 border-b backdrop-blur-lg transition-[border-color,box-shadow,background-color] duration-300"
+  data-header
+>
+  <div class="container-content flex h-16 items-center justify-between gap-6 md:h-20">
+    <a
+      href={href('/')}
+      class="rounded-md focus-visible:outline-offset-4"
+      aria-label={`${site.name} — home`}
+    >
+      <Logo />
+    </a>
+
+    <nav aria-label="Primary" class="hidden items-center gap-8 lg:flex">
+      {
+        site.nav.map((item) => {
+          const active = isActivePath(currentPath, item.href);
+          return (
+            <a
+              href={href(item.href)}
+              aria-current={active ? 'page' : undefined}
+              class:list={[linkBase, active ? `text-ink ${activeMarker}` : 'text-body']}
+            >
+              {item.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <div class="hidden lg:block">
+      <Button href="/contact/" variant="primary" icon="arrow-right">Start a project</Button>
+    </div>
+
+    <button
+      type="button"
+      class="text-ink hover:bg-subtle inline-flex size-11 items-center justify-center rounded-lg transition-colors lg:hidden"
+      aria-label="Open menu"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+      data-menu-open
+    >
+      <Icon name="menu" size={24} />
+    </button>
+  </div>
+</header>
+
+<dialog
+  id="mobile-menu"
+  class="bg-surface backdrop:bg-ink/45 m-0 h-dvh max-h-none w-full max-w-none p-0 backdrop:backdrop-blur-sm lg:hidden"
+  aria-label="Site menu"
+  data-menu-dialog
+>
+  <div class="flex h-full flex-col">
+    <div class="border-hairline flex h-16 items-center justify-between border-b px-5">
+      <Logo />
+      <button
+        type="button"
+        class="text-ink hover:bg-subtle inline-flex size-11 items-center justify-center rounded-lg transition-colors"
+        aria-label="Close menu"
+        data-menu-close
+      >
+        <Icon name="x" size={24} />
+      </button>
+    </div>
+
+    <nav aria-label="Site" class="flex-1 overflow-y-auto px-5 py-6">
+      <ul class="flex flex-col gap-1">
+        {
+          site.nav.map((item) => {
+            const active = isActivePath(currentPath, item.href);
+            return (
+              <li>
+                <a
+                  href={href(item.href)}
+                  aria-current={active ? 'page' : undefined}
+                  class:list={[
+                    'flex items-center justify-between rounded-xl px-4 py-3.5 text-lg font-medium',
+                    'transition-colors',
+                    active ? 'bg-subtle text-accent' : 'text-ink hover:bg-subtle',
+                  ]}
+                >
+                  {item.label}
+                  <Icon name="arrow-right" size={18} class="opacity-40" />
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+
+    <div class="border-hairline border-t px-5 py-6">
+      <Button href="/contact/" variant="primary" size="lg" class="w-full" icon="arrow-right">
+        Start a project
+      </Button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-menu-dialog]');
+  const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  const closeButton = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+
+  /* Lift the header off the page once scrolled, so it separates from content. */
+  if (header) {
+    const SCROLL_THRESHOLD = 8;
+    const applyScrollState = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > SCROLL_THRESHOLD);
+    };
+    applyScrollState();
+    window.addEventListener('scroll', applyScrollState, { passive: true });
+  }
+
+  if (dialog && openButton) {
+    const open = () => {
+      dialog.showModal();
+      openButton.setAttribute('aria-expanded', 'true');
+      // showModal() alone leaves the page behind scrollable on iOS Safari.
+      document.body.style.overflow = 'hidden';
+    };
+
+    const close = () => {
+      dialog.close();
+    };
+
+    openButton.addEventListener('click', open);
+    closeButton?.addEventListener('click', close);
+
+    /* Native `close` fires for Esc too, so all paths land here. */
+    dialog.addEventListener('close', () => {
+      openButton.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      openButton.focus();
+    });
+
+    /* Clicking the backdrop should dismiss. The dialog element's own box covers
+       the whole viewport here, so compare against the inner panel instead. */
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) close();
+    });
+
+    /* Tapping a link navigates; close first so the dialog is not left open in
+       the back/forward cache when the visitor returns. */
+    dialog.querySelectorAll('a[href]').forEach((link) => {
+      link.addEventListener('click', close);
+    });
+  }
+</script>
+
+<style>
+  [data-header].is-scrolled {
+    border-color: var(--hairline);
+    box-shadow: var(--shadow-subtle);
+  }
+
+  /* Slide the drawer in, and skip the animation under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-menu-dialog][open] {
+      animation: drawer-in 0.28s var(--ease-out-soft);
+    }
+
+    @keyframes drawer-in {
+      from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+      }
+    }
+  }
+</style>

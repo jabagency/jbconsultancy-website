@@ -1,0 +1,108 @@
+---
+/**
+ * The four service lines as a bento grid.
+ *
+ * The first card spans two columns on wide screens, which gives the grid a
+ * focal point instead of four identical boxes, and gives the lead service room
+ * for its highlight list.
+ */
+import Icon from '@components/ui/Icon.astro';
+import { services } from '@data/services';
+import { href } from '@lib/url';
+
+interface Props {
+  /** Link each card through to its section on /services/. */
+  linkToDetail?: boolean;
+}
+
+const { linkToDetail = true } = Astro.props;
+
+/**
+ * Bento spans, derived rather than hard-coded so adding a service cannot leave a
+ * hole in the last row: the lead card takes two of the three columns, and the
+ * final card widens by whatever the last row would otherwise leave empty.
+ */
+const COLUMNS = 3;
+const LEAD_SPAN = 2;
+const SPAN_CLASS = ['', '', 'lg:col-span-2', 'lg:col-span-3'] as const;
+const trailing = (LEAD_SPAN + services.length - 1) % COLUMNS;
+const lastSpan = trailing === 0 ? 1 : COLUMNS - trailing + 1;
+
+const CARD =
+  'group relative flex flex-col overflow-hidden rounded-card border border-hairline ' +
+  'bg-surface p-7 shadow-subtle transition-[transform,box-shadow,border-color] duration-300 ' +
+  'ease-out-soft hover:-translate-y-1 hover:border-accent/25 hover:shadow-lift ' +
+  'motion-reduce:hover:translate-y-0';
+---
+
+<ul class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+  {
+    services.map((service, index) => (
+      <li
+        class:list={[
+          'reveal',
+          index === 0 && SPAN_CLASS[LEAD_SPAN],
+          index === services.length - 1 && SPAN_CLASS[lastSpan],
+        ]}
+      >
+        <article class={CARD}>
+          {/* Gradient hairline that wipes across the top edge on hover. */}
+          <span
+            class="bg-gradient-brand ease-out-soft absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 transition-transform duration-400 group-hover:scale-x-100 motion-reduce:transition-none"
+            aria-hidden="true"
+          />
+
+          <span
+            class="border-hairline bg-subtle text-accent mb-5 inline-flex size-11 items-center justify-center rounded-xl border"
+            aria-hidden="true"
+          >
+            <Icon name={service.icon} size={21} />
+          </span>
+
+          <h3 class="text-display-sm text-ink">
+            {linkToDetail ? (
+              <a
+                href={href(`/services/#${service.slug}`)}
+                class="hover:text-accent transition-colors"
+              >
+                {service.title}
+                {/* Stretched hit area: the whole card is clickable, but the
+                    accessible name stays the heading text alone. */}
+                <span class="absolute inset-0" aria-hidden="true" />
+              </a>
+            ) : (
+              service.title
+            )}
+          </h3>
+
+          <p class="text-body mt-3 text-[0.9375rem] leading-relaxed">{service.summary}</p>
+
+          {index === 0 && (
+            <ul class="mt-6 grid gap-2.5 sm:grid-cols-2">
+              {service.highlights.map((highlight) => (
+                <li class="text-body flex items-start gap-2.5 text-sm">
+                  <Icon name="check" size={16} class="text-accent mt-0.5 shrink-0" />
+                  {highlight}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {linkToDetail && (
+            <p
+              class="text-accent mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-medium"
+              aria-hidden="true"
+            >
+              Learn more
+              <Icon
+                name="arrow-right"
+                size={16}
+                class="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+              />
+            </p>
+          )}
+        </article>
+      </li>
+    ))
+  }
+</ul>

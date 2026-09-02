@@ -1,0 +1,31 @@
+---
+/**
+ * Floating WhatsApp button, present on every page.
+ *
+ * Renders nothing at all when the configured number is still a placeholder —
+ * a dead link that lands the visitor on WhatsApp's "number is invalid" page is
+ * worse than no button.
+ */
+import Icon from '@components/ui/Icon.astro';
+import { site } from '@data/site';
+import { buildWhatsAppUrl } from '@lib/whatsapp';
+
+const url = buildWhatsAppUrl({
+  phone: site.contact.whatsapp,
+  message: `Hi ${site.name}, I found you online and would like to discuss a project.`,
+});
+---
+
+{
+  url && (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-whatsapp-fab
+      class="shadow-lift ease-out-soft fixed right-5 bottom-5 z-40 inline-flex size-14 items-center justify-center rounded-full bg-[#25D366] text-[#052e16] transition-transform duration-200 hover:scale-105 focus-visible:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100 md:right-8 md:bottom-8 print:hidden"
+    >
+      <Icon name="whatsapp" size={28} label="Chat with us on WhatsApp" />
+    </a>
+  )
+}

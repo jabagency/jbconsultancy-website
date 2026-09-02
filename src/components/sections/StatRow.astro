@@ -1,0 +1,27 @@
+---
+/**
+ * Facts band. Values come from src/data/partners.ts, which deliberately holds
+ * only figures that follow from the company brief rather than invented metrics.
+ */
+import { stats } from '@data/partners';
+---
+
+<dl class="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+  {
+    stats.map((stat) => (
+      <div class="reveal">
+        <dt class="text-body order-2 mt-2 text-sm">{stat.label}</dt>
+        <dd class="text-gradient text-display-md order-1 font-semibold">{stat.value}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  /* Visual order is value-then-label, but <dl> requires <dt> before <dd> in the
+     markup for a valid definition list. Flex ordering reconciles the two. */
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

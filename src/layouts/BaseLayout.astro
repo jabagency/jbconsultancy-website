@@ -1,0 +1,114 @@
+---
+/**
+ * The single page shell. Every route renders through here, so the header,
+ * footer, metadata and global scripts exist in exactly one place.
+ */
+import '@/styles/global.css';
+
+import Seo from '@components/seo/Seo.astro';
+import Header from '@components/layout/Header.astro';
+import Footer from '@components/layout/Footer.astro';
+import WhatsAppFab from '@components/contact/WhatsAppFab.astro';
+import { site } from '@data/site';
+import { href, stripBase } from '@lib/url';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Declare the Organization graph — home page only, to avoid duplicates. */
+  includeOrganisation?: boolean;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = site.description,
+  includeOrganisation = false,
+  noindex = false,
+} = Astro.props;
+
+const path = stripBase(Astro.url.pathname);
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <Seo
+      title={title}
+      description={description}
+      path={path}
+      includeOrganisation={includeOrganisation}
+      noindex={noindex}
+    />
+
+    <link rel="icon" href={href('/favicon.ico')} sizes="any" />
+    <link rel="icon" href={href('/favicon-32.png')} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
+    <link rel="sitemap" href={href('/sitemap-index.xml')} />
+
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080d18" media="(prefers-color-scheme: dark)" />
+
+    <!--
+      Drop the `no-js` class as early as possible. Scroll-reveal targets are
+      hidden by default, and `html.no-js .reveal` in global.css keeps them
+      visible if JS never arrives; removing the class here hands control to the
+      IntersectionObserver below.
+    -->
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+  </head>
+
+  <body class="bg-canvas text-body flex min-h-dvh flex-col">
+    <a
+      href="#main-content"
+      class="bg-surface text-ink shadow-card focus-visible:ring-accent sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-[100] focus-visible:rounded-lg focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-medium"
+    >
+      Skip to main content
+    </a>
+
+    <Header />
+
+    <main id="main-content" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+    <WhatsAppFab />
+
+    <script>
+      /**
+       * Scroll-reveal. Elements carrying `.reveal` fade and rise into place once
+       * they enter the viewport, then are unobserved — the animation is a
+       * one-shot, so there is no reason to keep watching them.
+       */
+      const targets = document.querySelectorAll<HTMLElement>('.reveal');
+      const wantsMotion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (targets.length > 0 && wantsMotion && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          },
+          // Trigger slightly before the element is fully on screen so the
+          // motion finishes about when the reader's eye arrives.
+          { rootMargin: '0px 0px -12% 0px', threshold: 0.05 },
+        );
+
+        targets.forEach((target) => observer.observe(target));
+      } else {
+        // No observer, or the visitor asked for less motion: show everything.
+        targets.forEach((target) => target.classList.add('is-visible'));
+      }
+    </script>
+  </body>
+</html>

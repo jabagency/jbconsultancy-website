@@ -1,0 +1,40 @@
+---
+/**
+ * The <h1> band at the top of every inner page.
+ *
+ * Kept as one component so the four inner pages cannot drift apart in spacing,
+ * type scale or landmark structure, and so there is exactly one place that
+ * decides how a page opens.
+ */
+import Container from '@components/layout/Container.astro';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+}
+
+const { eyebrow, title, lead } = Astro.props;
+---
+
+<header class="border-hairline relative isolate overflow-hidden border-b">
+  {/* Decorative wash, echoing the hero without competing with it. */}
+  <div
+    class="pointer-events-none absolute inset-0 -z-10"
+    aria-hidden="true"
+    style="background:
+      radial-gradient(60rem 26rem at 15% -20%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 70%),
+      radial-gradient(40rem 20rem at 92% 0%, color-mix(in oklab, var(--color-brand-500) 10%, transparent), transparent 70%);"
+  >
+  </div>
+
+  <Container class="pt-14 pb-14 md:pt-20 md:pb-20">
+    <div class="max-w-3xl">
+      <p class="text-accent mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
+        {eyebrow}
+      </p>
+      <h1 class="text-display-lg text-ink">{title}</h1>
+      {lead && <p class="text-lead text-body mt-5">{lead}</p>}
+    </div>
+  </Container>
+</header>

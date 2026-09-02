@@ -1,0 +1,88 @@
+---
+/**
+ * Inline SVG icon.
+ *
+ * Icons are inlined from a local registry rather than pulled from an icon font
+ * or sprite sheet: there is no extra request, they inherit `currentColor`, and
+ * the set stays small enough to audit. Stroke icons follow the Lucide
+ * conventions (24px grid, 2px stroke, round caps).
+ *
+ * Decorative by default (`aria-hidden`). Pass a `label` only when the icon is
+ * the sole carrier of meaning — otherwise it duplicates adjacent text for
+ * screen reader users.
+ */
+
+const STROKE_ICONS = {
+  users:
+    'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  layers:
+    'm12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83ZM2 12.5l8.58 3.91a2 2 0 0 0 1.66 0L22 12.5M2 17.5l8.58 3.91a2 2 0 0 0 1.66 0L22 17.5',
+  'trending-up': 'M16 7h6v6M22 7l-8.5 8.5-5-5L2 17',
+  sparkles:
+    'M9.94 4.66a1 1 0 0 1 1.9 0l1.2 3.32a1 1 0 0 0 .6.6l3.32 1.2a1 1 0 0 1 0 1.9l-3.32 1.2a1 1 0 0 0-.6.6l-1.2 3.32a1 1 0 0 1-1.9 0l-1.2-3.32a1 1 0 0 0-.6-.6l-3.32-1.2a1 1 0 0 1 0-1.9l3.32-1.2a1 1 0 0 0 .6-.6ZM18 3v4M20 5h-4M5 17v3M6.5 18.5h-3',
+  database:
+    'M12 8c4.42 0 8-1.34 8-3s-3.58-3-8-3-8 1.34-8 3 3.58 3 8 3M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3',
+  code: 'm16 18 6-6-6-6M8 6l-6 6 6 6',
+  cpu: 'M4 4h16v16H4zM9 9h6v6H9zM9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3',
+  'arrow-right': 'M5 12h14M12 5l7 7-7 7',
+  'arrow-up-right': 'M7 17 17 7M7 7h10v10',
+  check: 'M20 6 9 17l-5-5',
+  mail: 'M22 6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Zm0 0-10 7L2 6',
+  phone:
+    'M13.83 19.24a17.6 17.6 0 0 1-7.08-4A17.6 17.6 0 0 1 2.76 8.2 2 2 0 0 1 4.1 6.06l2-.35a2 2 0 0 1 2.23 1.2l.7 1.7a2 2 0 0 1-.5 2.26l-.7.63a13.6 13.6 0 0 0 4.66 4.66l.63-.7a2 2 0 0 1 2.26-.5l1.7.7a2 2 0 0 1 1.2 2.23l-.35 2a2 2 0 0 1-2.14 1.34Z',
+  'map-pin': 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  x: 'M18 6 6 18M6 6l12 12',
+  'shield-check': 'M20 12c0 5-8 10-8 10s-8-5-8-10V6l8-3 8 3ZM9 12l2 2 4-4',
+  clock: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M12 7v5l3 2',
+  target:
+    'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0M13 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0',
+} as const;
+
+/** Brand glyphs are solid single paths, so they render with fill, not stroke. */
+const FILL_ICONS = {
+  whatsapp:
+    'M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.97L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.19-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 7.33c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.03s.87 2.36 1 2.52c.12.16 1.69 2.7 4.1 3.68 2 .81 2.41.65 2.84.61.43-.04 1.39-.57 1.59-1.12.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.28-.24-.12-1.39-.68-1.6-.76-.22-.08-.38-.12-.54.12-.16.24-.62.8-.76.96-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.32-.74-1.8-.16-.38-.32-.4-.48-.4z',
+  linkedin:
+    'M6.94 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0M3.2 8.75h3.48V21H3.2zM9.6 8.75h3.34v1.68h.05a3.66 3.66 0 0 1 3.3-1.81c3.53 0 4.18 2.32 4.18 5.34V21h-3.48v-5.5c0-1.31-.02-3-1.83-3-1.83 0-2.11 1.43-2.11 2.9V21H9.6z',
+} as const;
+
+export type IconName = keyof typeof STROKE_ICONS | keyof typeof FILL_ICONS;
+
+interface Props {
+  name: IconName;
+  /** Rendered size in px, applied to both axes. */
+  size?: number;
+  /** Accessible name. Omit for decorative icons sitting beside real text. */
+  label?: string;
+  class?: string | undefined;
+}
+
+const { name, size = 20, label, class: className } = Astro.props;
+
+const isFilled = name in FILL_ICONS;
+const path = isFilled
+  ? FILL_ICONS[name as keyof typeof FILL_ICONS]
+  : STROKE_ICONS[name as keyof typeof STROKE_ICONS];
+
+// `as const` on `role` so it narrows to AriaRole rather than widening to string.
+const a11y = label
+  ? ({ role: 'img' as const, 'aria-label': label } as const)
+  : ({ 'aria-hidden': 'true' as const, focusable: 'false' as const } as const);
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  fill={isFilled ? 'currentColor' : 'none'}
+  stroke={isFilled ? 'none' : 'currentColor'}
+  stroke-width={isFilled ? undefined : 1.75}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={className}
+  {...a11y}
+>
+  <path d={path}></path>
+</svg>

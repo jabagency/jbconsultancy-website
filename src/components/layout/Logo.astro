@@ -1,0 +1,42 @@
+---
+/**
+ * Brand lockup: the circular mark plus the wordmark.
+ *
+ * The mark is imported from src/assets so Astro's pipeline converts it to WebP
+ * and emits only the sizes requested. `densities` covers retina without
+ * shipping a needlessly large file to everyone else.
+ */
+import { Image } from 'astro:assets';
+import logoMark from '@/assets/brand/logo.png';
+import { site } from '@data/site';
+
+interface Props {
+  /** Rendered size of the mark in px. */
+  size?: number;
+  /** Hide the wordmark and show the mark alone. */
+  markOnly?: boolean;
+  class?: string;
+}
+
+const { size = 38, markOnly = false, class: className } = Astro.props;
+---
+
+<span class:list={['inline-flex items-center gap-2.5', className]}>
+  <Image
+    src={logoMark}
+    alt={markOnly ? `${site.name} logo` : ''}
+    width={size}
+    height={size}
+    densities={[1, 2]}
+    loading="eager"
+    class="shrink-0"
+  />
+  {
+    !markOnly && (
+      <span class="text-ink text-[1.0625rem] leading-none font-semibold tracking-[-0.02em]">
+        {site.shortName}
+        <span class="text-body font-medium"> Consultancy</span>
+      </span>
+    )
+  }
+</span>

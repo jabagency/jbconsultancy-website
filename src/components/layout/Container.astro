@@ -1,0 +1,22 @@
+---
+/**
+ * The shared content measure. Every page region routes through this so the
+ * left edge of text lines up across the whole site.
+ */
+interface Props {
+  /** Narrower measure for long-form prose, where ~70ch reads best. */
+  size?: 'default' | 'prose';
+  as?: 'div' | 'section' | 'header' | 'footer' | 'nav' | 'main';
+  class?: string | undefined;
+}
+
+// Annotated explicitly: the dynamic `<Tag>` below stops Astro's generated types
+// from referencing `Props`, which otherwise reads as an unused declaration.
+const { size = 'default', as: Tag = 'div', class: className }: Props = Astro.props;
+
+const classes = ['container-content', size === 'prose' ? 'max-w-[70ch]' : '', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<Tag class={classes}><slot /></Tag>

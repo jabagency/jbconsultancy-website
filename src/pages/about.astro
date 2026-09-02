@@ -1,0 +1,167 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Section from '@components/layout/Section.astro';
+import PageHeader from '@components/sections/PageHeader.astro';
+import StatRow from '@components/sections/StatRow.astro';
+import OrganisationGrid from '@components/sections/OrganisationGrid.astro';
+import CtaBanner from '@components/sections/CtaBanner.astro';
+import Icon from '@components/ui/Icon.astro';
+import { site } from '@data/site';
+import { clientEngagements, deliveryPartners } from '@data/partners';
+
+const description =
+  `Founded in ${site.foundedYear}, JB Consultancy bridges the gap between exceptional ` +
+  'talent and technology-driven business outcomes for fast-scaling platforms and ' +
+  'enterprises.';
+
+/** Mission / vision, taken from the company brief. */
+const pillars = [
+  {
+    icon: 'target',
+    label: 'Mission',
+    body:
+      'To bridge the gap between exceptional talent and technology-driven business outcomes — ' +
+      'giving our clients a partner who is accountable for the result, not just the resource.',
+  },
+  {
+    icon: 'sparkles',
+    label: 'Vision',
+    body:
+      'To be the consulting partner fast-scaling organisations call first when a programme ' +
+      'has to land: enterprise rigour with the pace of a product team.',
+  },
+] as const;
+
+/** How we work. Each value is written as a commitment we can be held to. */
+const values = [
+  {
+    icon: 'shield-check',
+    title: 'Accountability over activity',
+    body: 'We agree the outcome up front and report against it. Progress is measured by what is live, not by hours logged.',
+  },
+  {
+    icon: 'users',
+    title: 'People first, always',
+    body: 'Every placement is a career decision for someone. We brief candidates honestly and only put forward people we would hire ourselves.',
+  },
+  {
+    icon: 'layers',
+    title: 'Build it to be maintained',
+    body: 'Documentation, tests and handover are part of delivery. You should be able to run what we build without us.',
+  },
+  {
+    icon: 'clock',
+    title: 'Move at your pace',
+    body: 'Engagements scale up and down as the roadmap changes. No minimum bench, no penalty for finishing early.',
+  },
+  {
+    icon: 'trending-up',
+    title: 'Commercially literate',
+    body: 'We ask what the business case is before proposing an architecture, and we say so when the simpler option is the right one.',
+  },
+  {
+    icon: 'check',
+    title: 'Say the difficult thing',
+    body: 'If a date is unrealistic or a requirement is wrong, you hear it early — while it is still cheap to change.',
+  },
+] as const;
+---
+
+<BaseLayout title="About" description={description}>
+  <PageHeader
+    eyebrow="About us"
+    title="A consulting partner built for how technology teams actually scale"
+    lead={`Founded in ${site.foundedYear}, ${site.name} is a consulting and technology services firm operating at the intersection of talent, delivery and growth. We work with fast-scaling platforms, fintech disruptors and established enterprises that need capability now, without giving up on doing it properly.`}
+  />
+
+  <Section>
+    <div class="grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
+      <div class="reveal">
+        <h2 class="text-display-sm text-ink">Who we are</h2>
+        <div class="text-body mt-5 flex flex-col gap-4 text-[1.0625rem] leading-relaxed">
+          <p>
+            {site.name} was founded on a simple observation: most organisations do not have a talent problem
+            or a delivery problem in isolation — they have both, and the two are usually solved by different
+            vendors who never speak to each other.
+          </p>
+          <p>
+            We do both. We source the specialists who will sit inside your team, and we run complete
+            programmes end to end when it makes more sense for us to own the outcome. The same
+            people who assess a candidate's technical depth are the people who have shipped that
+            stack in production, which is why our screening holds up.
+          </p>
+          <p>
+            Our work spans specialised staffing, full life-cycle project delivery, marketing and
+            growth partnerships, and applied AI engineering — supported by deep practices in SAP,
+            Oracle, and modern full-stack development.
+          </p>
+        </div>
+      </div>
+
+      <ul class="flex flex-col gap-5">
+        {
+          pillars.map((pillar) => (
+            <li class="reveal rounded-card border-hairline bg-subtle border p-7 md:p-8">
+              <span class="text-accent inline-flex" aria-hidden="true">
+                <Icon name={pillar.icon} size={24} />
+              </span>
+              <h3 class="text-accent mt-4 text-xs font-semibold tracking-[0.18em] uppercase">
+                {pillar.label}
+              </h3>
+              <p class="text-ink mt-2.5 text-[1.0625rem] leading-relaxed font-medium">
+                {pillar.body}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Section>
+
+  <Section
+    tone="subtle"
+    eyebrow="How we work"
+    title="Six commitments we hold ourselves to"
+    lead="These are the working principles behind every engagement — the things a client should be able to hold us to from week one."
+  >
+    <ul class="grid gap-x-10 gap-y-9 md:grid-cols-2 lg:grid-cols-3">
+      {
+        values.map((value) => (
+          <li class="reveal">
+            <span class="text-accent inline-flex" aria-hidden="true">
+              <Icon name={value.icon} size={22} />
+            </span>
+            <h3 class="text-ink mt-3.5 text-lg font-semibold">{value.title}</h3>
+            <p class="text-body mt-2 text-[0.9375rem] leading-relaxed">{value.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section eyebrow="At a glance" title="Where we stand today">
+    <StatRow />
+  </Section>
+
+  <Section
+    tone="subtle"
+    eyebrow="Ecosystem"
+    title="Who we work with"
+    lead="We collaborate with globally recognised integrators on enterprise transformation, and hold long-running partnerships where we own a specific capability inside a client's organisation."
+  >
+    <h3 class="text-ink reveal text-xl font-semibold">Delivery partners</h3>
+    <div class="mt-6">
+      <OrganisationGrid organisations={deliveryPartners} />
+    </div>
+
+    <h3 class="text-ink reveal mt-14 text-xl font-semibold">Client engagements</h3>
+    <div class="mt-6">
+      <OrganisationGrid organisations={clientEngagements} />
+    </div>
+  </Section>
+
+  <CtaBanner
+    title="Want to know whether we are a fit?"
+    lead="The fastest way to find out is a short conversation about what you are trying to land and by when."
+  />
+</BaseLayout>

@@ -1,0 +1,43 @@
+---
+/**
+ * Inline "chat on WhatsApp" call to action.
+ *
+ * Renders nothing at all when the number is still a placeholder — a dead link to
+ * wa.me shows the visitor a WhatsApp error page, which is worse than no button.
+ */
+import Button from '@components/ui/Button.astro';
+import { site } from '@data/site';
+import { buildWhatsAppUrl } from '@lib/whatsapp';
+
+interface Props {
+  /** Prefilled message. Defaults to a neutral opener. */
+  message?: string;
+  label?: string;
+  size?: 'md' | 'lg';
+  class?: string;
+}
+
+const {
+  message = `Hi ${site.name}, I found you through your website and would like to talk about a project.`,
+  label = 'Chat on WhatsApp',
+  size = 'lg',
+  class: className,
+} = Astro.props;
+
+const url = buildWhatsAppUrl({ phone: site.contact.whatsapp, message });
+---
+
+{
+  url && (
+    <Button
+      href={url}
+      variant="whatsapp"
+      size={size}
+      iconStart="whatsapp"
+      external
+      class={className}
+    >
+      {label}
+    </Button>
+  )
+}

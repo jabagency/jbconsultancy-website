@@ -1,0 +1,371 @@
+---
+/**
+ * Contact form with Web3Forms delivery.
+ *
+ * Configuration reaches the browser through data attributes rather than
+ * `define:vars`, which keeps values out of an inline script and lets the script
+ * stay a bundled module that can import the shared validators in src/lib/form.ts.
+ * The Web3Forms access key is public by design, so exposing it in markup is
+ * expected rather than a leak.
+ *
+ * Degradation, in order:
+ *   1. No access key configured → submit falls back to a `mailto:` composer.
+ *   2. No JavaScript             → a notice points the visitor at email/WhatsApp.
+ *   3. Network or API failure    → error message keeps the typed content intact.
+ */
+import Button from '@components/ui/Button.astro';
+import { site, isPlaceholder } from '@data/site';
+import { services } from '@data/services';
+import { LIMITS } from '@lib/form';
+
+const accessKey = site.forms.web3formsKey.trim();
+const emailReady = !isPlaceholder(site.contact.email);
+
+const fieldWrap = 'flex flex-col gap-2';
+const labelClass = 'text-ink text-sm font-medium';
+const controlClass =
+  'w-full rounded-xl border border-hairline bg-surface px-4 py-3 text-[0.9375rem] text-ink ' +
+  'placeholder:text-muted transition-[border-color,box-shadow] duration-200 ' +
+  'focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25 ' +
+  'aria-[invalid=true]:border-red-500 aria-[invalid=true]:ring-2 ' +
+  'aria-[invalid=true]:ring-red-500/20';
+const errorClass = 'text-sm text-red-600 dark:text-red-400 min-h-0';
+---
+
+<form
+  id="contact-form"
+  novalidate
+  data-contact-form
+  data-endpoint={site.forms.endpoint}
+  data-access-key={accessKey}
+  data-site-name={site.name}
+  data-contact-email={emailReady ? site.contact.email : ''}
+  class="flex flex-col gap-5"
+>
+  <!--
+    Honeypot. Positioned off-screen rather than display:none, which naive bots
+    are more likely to skip, and hidden from assistive tech plus the tab order
+    so no real visitor can reach it.
+  -->
+  <div class="absolute left-[-9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+    <label for="botcheck">Leave this field empty</label>
+    <input id="botcheck" type="text" name="botcheck" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div class={fieldWrap}>
+      <label for="name" class={labelClass}>
+        Full name <span class="text-red-600 dark:text-red-400" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="name"
+        name="name"
+        type="text"
+        required
+        autocomplete="name"
+        maxlength={LIMITS.name.max}
+        placeholder="Priya Raman"
+        aria-describedby="name-error"
+        class={controlClass}
+      />
+      <p id="name-error" class={errorClass} data-error-for="name"></p>
+    </div>
+
+    <div class={fieldWrap}>
+      <label for="email" class={labelClass}>
+        Work email <span class="text-red-600 dark:text-red-400" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        required
+        autocomplete="email"
+        maxlength={LIMITS.email.max}
+        placeholder="you@company.com"
+        aria-describedby="email-error"
+        class={controlClass}
+      />
+      <p id="email-error" class={errorClass} data-error-for="email"></p>
+    </div>
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div class={fieldWrap}>
+      <label for="company" class={labelClass}>Company</label>
+      <input
+        id="company"
+        name="company"
+        type="text"
+        autocomplete="organization"
+        maxlength={LIMITS.company.max}
+        placeholder="Finlane"
+        aria-describedby="company-error"
+        class={controlClass}
+      />
+      <p id="company-error" class={errorClass} data-error-for="company"></p>
+    </div>
+
+    <div class={fieldWrap}>
+      <label for="service" class={labelClass}>What do you need help with?</label>
+      <select id="service" name="service" class={controlClass}>
+        <option value="">Select a service…</option>
+        {services.map((service) => <option value={service.slug}>{service.title}</option>)}
+        <option value="other">Something else</option>
+      </select>
+    </div>
+  </div>
+
+  <div class={fieldWrap}>
+    <label for="message" class={labelClass}>
+      How can we help? <span class="text-red-600 dark:text-red-400" aria-hidden="true">*</span>
+    </label>
+    <textarea
+      id="message"
+      name="message"
+      required
+      rows="5"
+      minlength={LIMITS.message.min}
+      maxlength={LIMITS.message.max}
+      placeholder="Tell us about the outcome you need, your timeline, and any constraints we should know about."
+      aria-describedby="message-error message-hint"
+      class={`${controlClass} resize-y`}></textarea>
+    <div class="flex items-start justify-between gap-4">
+      <p id="message-error" class={errorClass} data-error-for="message"></p>
+      <p id="message-hint" class="text-muted shrink-0 text-xs">
+        <span data-char-count>0</span>/{LIMITS.message.max}
+      </p>
+    </div>
+  </div>
+
+  <noscript>
+    <p class="border-hairline bg-subtle text-body rounded-xl border px-4 py-3 text-sm">
+      This form needs JavaScript to send. {
+        emailReady ? (
+          <>
+            You can email us directly at{' '}
+            <a href={`mailto:${site.contact.email}`} class="text-accent underline">
+              {site.contact.email}
+            </a>
+            .
+          </>
+        ) : (
+          'Please use the WhatsApp or email links on this page instead.'
+        )
+      }
+    </p>
+  </noscript>
+
+  <div class="mt-1 flex flex-wrap items-center gap-4">
+    <Button type="submit" variant="primary" size="lg" icon="arrow-right" id="contact-submit">
+      <span data-submit-label>Send enquiry</span>
+    </Button>
+    <p class="text-muted text-xs">
+      We reply to every enquiry. No newsletters, no sharing your details.
+    </p>
+  </div>
+
+  <!--
+    Single live region for submission outcome. `polite` so it does not interrupt,
+    and it is announced only when populated.
+  -->
+  <p
+    role="status"
+    aria-live="polite"
+    data-form-status
+    class="hidden items-start gap-2.5 rounded-xl border px-4 py-3 text-sm"
+  >
+  </p>
+</form>
+
+<script>
+  import { buildMailtoFallback, buildSubmissionPayload, validateContact } from '@lib/form';
+  import type { ContactFormValues } from '@lib/form';
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-form-status]')!;
+    const submitButton = form.querySelector<HTMLButtonElement>('#contact-submit')!;
+    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]')!;
+    const charCount = form.querySelector<HTMLElement>('[data-char-count]');
+    const messageField = form.querySelector<HTMLTextAreaElement>('#message');
+
+    /**
+     * Read on submit rather than at load. The values are static in production,
+     * but reading them late keeps the handler a pure function of the DOM, which
+     * is what lets tests exercise the configured and unconfigured branches
+     * against the same build.
+     */
+    const readConfig = () => ({
+      endpoint: form.dataset.endpoint ?? '',
+      accessKey: (form.dataset.accessKey ?? '').trim(),
+      siteName: form.dataset.siteName ?? '',
+      contactEmail: form.dataset.contactEmail ?? '',
+    });
+
+    const STATUS_STYLES = {
+      success: 'border-green-500/30 bg-green-500/10 text-green-800 dark:text-green-300',
+      error: 'border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-300',
+    } as const;
+
+    /** Read the form into the plain shape the validators expect. */
+    const readValues = (): ContactFormValues => {
+      const data = new FormData(form);
+      const get = (key: string) => String(data.get(key) ?? '');
+      return {
+        name: get('name'),
+        email: get('email'),
+        company: get('company'),
+        service: get('service'),
+        message: get('message'),
+        botcheck: get('botcheck'),
+      };
+    };
+
+    const showStatus = (kind: 'success' | 'error', message: string) => {
+      status.textContent = message;
+      status.className =
+        'mt-1 flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm ' + STATUS_STYLES[kind];
+    };
+
+    const clearStatus = () => {
+      status.textContent = '';
+      status.className = 'hidden items-start gap-2.5 rounded-xl border px-4 py-3 text-sm';
+    };
+
+    /** Paint inline errors and return the first invalid control, for focusing. */
+    const renderErrors = (errors: Record<string, string | undefined>): HTMLElement | null => {
+      let firstInvalid: HTMLElement | null = null;
+
+      for (const field of ['name', 'email', 'company', 'message']) {
+        const control = form.querySelector<HTMLElement>(`[name="${field}"]`);
+        const slot = form.querySelector<HTMLElement>(`[data-error-for="${field}"]`);
+        const message = errors[field];
+
+        if (slot) slot.textContent = message ?? '';
+
+        if (control) {
+          if (message) {
+            control.setAttribute('aria-invalid', 'true');
+            firstInvalid ??= control;
+          } else {
+            control.removeAttribute('aria-invalid');
+          }
+        }
+      }
+
+      return firstInvalid;
+    };
+
+    /* Deep links from /services/ arrive as ?service=<slug>. Preselect it so the
+       visitor does not have to restate what they just clicked. The value is only
+       applied when it matches an existing <option>, so an arbitrary query string
+       cannot inject anything. */
+    const requestedService = new URLSearchParams(window.location.search).get('service');
+    const serviceField = form.querySelector<HTMLSelectElement>('#service');
+    if (requestedService && serviceField) {
+      const match = Array.from(serviceField.options).find(
+        (option) => option.value === requestedService,
+      );
+      if (match) serviceField.value = match.value;
+    }
+
+    /* Live character counter, and clear a field's error as soon as it is edited. */
+    messageField?.addEventListener('input', () => {
+      if (charCount) charCount.textContent = String(messageField.value.length);
+    });
+
+    form.addEventListener('input', (event) => {
+      const target = event.target as HTMLElement | null;
+      const name = target?.getAttribute('name');
+      if (!name) return;
+      const slot = form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+      if (slot?.textContent) {
+        slot.textContent = '';
+        target?.removeAttribute('aria-invalid');
+      }
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearStatus();
+
+      const values = readValues();
+      const { endpoint, accessKey, siteName, contactEmail } = readConfig();
+      const result = validateContact(values);
+
+      /* Honeypot tripped: show the ordinary success state and send nothing, so
+         the bot gets no signal that it was detected. */
+      if (result.isBot) {
+        form.reset();
+        showStatus('success', 'Thank you — your enquiry has been sent.');
+        return;
+      }
+
+      const firstInvalid = renderErrors(result.errors);
+      if (!result.valid) {
+        firstInvalid?.focus();
+        return;
+      }
+
+      /* No access key configured: hand off to the visitor's mail client rather
+         than pretending to submit. */
+      if (accessKey.length === 0) {
+        if (contactEmail.length === 0) {
+          showStatus(
+            'error',
+            'This form is not yet connected. Please reach us on WhatsApp in the meantime.',
+          );
+          return;
+        }
+        // Status first: assigning `location` hands control to the mail client,
+        // and on some platforms nothing after it is guaranteed to run.
+        showStatus('success', 'Opening your email app to send the enquiry…');
+        window.location.href = buildMailtoFallback(values, contactEmail, siteName);
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitLabel.textContent = 'Sending…';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(buildSubmissionPayload(values, accessKey, siteName)),
+        });
+
+        const payload: unknown = await response.json().catch(() => null);
+        const succeeded =
+          response.ok && (payload === null || (payload as { success?: boolean }).success !== false);
+
+        if (succeeded) {
+          form.reset();
+          if (charCount) charCount.textContent = '0';
+          renderErrors({});
+          showStatus(
+            'success',
+            'Thank you — your enquiry has been sent. We will get back to you shortly.',
+          );
+        } else {
+          const detail =
+            payload && typeof (payload as { message?: string }).message === 'string'
+              ? (payload as { message: string }).message
+              : 'Something went wrong while sending.';
+          showStatus('error', `${detail} Please try again, or reach us on WhatsApp.`);
+        }
+      } catch {
+        /* Network-level failure. The typed content is deliberately left in the
+           form so nothing the visitor wrote is lost. */
+        showStatus(
+          'error',
+          'We could not reach the server. Check your connection and try again, or message us on WhatsApp.',
+        );
+      } finally {
+        submitButton.disabled = false;
+        submitLabel.textContent = 'Send enquiry';
+      }
+    });
+  }
+</script>

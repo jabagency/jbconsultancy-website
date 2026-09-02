@@ -1,0 +1,115 @@
+---
+/**
+ * Button / call-to-action.
+ *
+ * Renders an <a> when given an `href` and a <button> otherwise, so the element
+ * always matches its behaviour — navigation is a link, action is a button. That
+ * keeps keyboard and assistive-tech semantics correct for free.
+ */
+import Icon, { type IconName } from './Icon.astro';
+import { href as resolveHref } from '@lib/url';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'whatsapp';
+type Size = 'md' | 'lg';
+
+interface Props {
+  href?: string;
+  variant?: Variant;
+  size?: Size;
+  /** Icon rendered after the label. */
+  icon?: IconName;
+  /** Icon rendered before the label. */
+  iconStart?: IconName;
+  type?: 'button' | 'submit';
+  /** Opens in a new tab and adds the required rel + a visually-hidden hint. */
+  external?: boolean;
+  disabled?: boolean;
+  // `| undefined` on the pass-through props: under exactOptionalPropertyTypes a
+  // wrapper forwarding its own optional `class`/`id` would otherwise not type.
+  class?: string | undefined;
+  id?: string | undefined;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  iconStart,
+  type = 'button',
+  external = false,
+  disabled = false,
+  class: className,
+  id,
+} = Astro.props;
+
+const BASE =
+  'group inline-flex items-center justify-center gap-2 rounded-pill font-medium ' +
+  'transition-[transform,box-shadow,background-color,border-color,color] duration-200 ' +
+  'ease-out-soft whitespace-nowrap select-none ' +
+  // 44px minimum target, per WCAG 2.2 Target Size (Minimum).
+  'min-h-11 ' +
+  'active:translate-y-px ' +
+  'aria-disabled:pointer-events-none aria-disabled:opacity-55 ' +
+  'disabled:pointer-events-none disabled:opacity-55';
+
+const SIZES: Record<Size, string> = {
+  md: 'px-5 py-2.5 text-[0.9375rem]',
+  lg: 'px-7 py-3.5 text-base',
+};
+
+const VARIANTS: Record<Variant, string> = {
+  // `text-on-accent`, not `text-white`: the gradient inverts in dark mode, where
+  // white would drop to 2.08:1 against the lifted teal stop.
+  primary:
+    'bg-gradient-brand text-on-accent shadow-accent hover:shadow-lift hover:-translate-y-0.5',
+  secondary:
+    'border border-hairline bg-surface text-ink shadow-subtle ' +
+    'hover:border-accent/40 hover:text-accent hover:-translate-y-0.5 hover:shadow-card',
+  ghost: 'text-ink hover:bg-subtle hover:text-accent',
+  // WhatsApp's own brand green, so the button is instantly recognisable.
+  whatsapp: 'bg-[#25D366] text-[#052e16] shadow-subtle hover:brightness-105 hover:-translate-y-0.5',
+};
+
+const classes = [BASE, SIZES[size], VARIANTS[variant], className].filter(Boolean).join(' ');
+
+const isLink = typeof href === 'string';
+const resolved = isLink ? resolveHref(href) : undefined;
+
+const externalAttrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+{
+  isLink ? (
+    <a
+      href={resolved}
+      id={id}
+      class={classes}
+      aria-disabled={disabled ? 'true' : undefined}
+      {...externalAttrs}
+    >
+      {iconStart && <Icon name={iconStart} size={18} />}
+      <slot />
+      {icon && (
+        <Icon
+          name={icon}
+          size={18}
+          class="transition-transform duration-200 group-hover:translate-x-0.5"
+        />
+      )}
+      {external && <span class="sr-only">(opens in a new tab)</span>}
+    </a>
+  ) : (
+    <button type={type} id={id} class={classes} disabled={disabled}>
+      {iconStart && <Icon name={iconStart} size={18} />}
+      <slot />
+      {icon && (
+        <Icon
+          name={icon}
+          size={18}
+          class="transition-transform duration-200 group-hover:translate-x-0.5"
+        />
+      )}
+    </button>
+  )
+}

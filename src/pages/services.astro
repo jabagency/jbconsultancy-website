@@ -1,0 +1,143 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Section from '@components/layout/Section.astro';
+import Container from '@components/layout/Container.astro';
+import PageHeader from '@components/sections/PageHeader.astro';
+import CtaBanner from '@components/sections/CtaBanner.astro';
+import Button from '@components/ui/Button.astro';
+import Icon from '@components/ui/Icon.astro';
+import { services } from '@data/services';
+
+const description =
+  'Specialised staffing, end-to-end project delivery, marketing and growth partnerships, ' +
+  'and AI engineering — four service lines from JB Consultancy, scoped around outcomes.';
+
+/**
+ * Engagement models. The service lines say *what* we do; buyers also need to know
+ * *how* it is bought, which is the question that usually stalls a conversation.
+ */
+const engagementModels = [
+  {
+    title: 'Embedded specialists',
+    body: 'Individual engineers or a squad joining your team, your rituals and your board. Billed monthly, scaled up or down with a month of notice.',
+  },
+  {
+    title: 'Owned delivery',
+    body: 'We take a scope and a date, and run it as our programme — architecture through deployment, with a named delivery lead accountable to you.',
+  },
+  {
+    title: 'Retained partnership',
+    body: 'An ongoing capability we own inside your organisation, for a fixed monthly commitment. How our longest client relationships run.',
+  },
+] as const;
+---
+
+<BaseLayout title="Services" description={description}>
+  <PageHeader
+    eyebrow="Services"
+    title="Four service lines, one accountable team"
+    lead="Each engagement is scoped around the outcome you need rather than a fixed set of deliverables — and because staffing and delivery sit under the same roof, we can move between them as the work demands."
+  />
+
+  {
+    /* Jump list: four sections is enough to warrant one, and it doubles as an
+      in-page summary for anyone skimming. */
+  }
+  <Container class="pt-10">
+    <nav aria-label="Services on this page">
+      <ul class="flex flex-wrap gap-2.5">
+        {
+          services.map((service) => (
+            <li>
+              <a
+                href={`#${service.slug}`}
+                class="border-hairline bg-surface text-body rounded-pill hover:border-accent/40 hover:text-accent inline-flex min-h-11 items-center border px-4 text-sm transition-colors duration-200"
+              >
+                {service.title}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </Container>
+
+  {
+    services.map((service, index) => (
+      <Section id={service.slug} tone={index % 2 === 0 ? 'surface' : 'subtle'}>
+        <div class="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-20">
+          <div class="reveal">
+            <span
+              class="text-accent bg-accent/8 border-accent/15 inline-flex h-12 w-12 items-center justify-center rounded-xl border"
+              aria-hidden="true"
+            >
+              <Icon name={service.icon} size={24} />
+            </span>
+            <p class="text-muted mt-6 text-xs font-semibold tracking-[0.18em] uppercase">
+              {String(index + 1).padStart(2, '0')}
+            </p>
+            <h2 class="text-display-sm text-ink mt-2">{service.title}</h2>
+            <p class="text-lead text-body mt-4">{service.summary}</p>
+          </div>
+
+          <div class="reveal">
+            <p class="text-body text-[1.0625rem] leading-relaxed">{service.body}</p>
+
+            <h3 class="text-ink mt-8 text-sm font-semibold tracking-[0.02em]">
+              What that includes
+            </h3>
+            <ul class="mt-4 flex flex-col gap-3">
+              {service.highlights.map((highlight) => (
+                <li class="text-body flex items-start gap-3 text-[0.9375rem]">
+                  <span
+                    class="text-accent bg-accent/10 mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                    aria-hidden="true"
+                  >
+                    <Icon name="check" size={13} />
+                  </span>
+                  <span>{highlight}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div class="mt-8">
+              <Button
+                href={`/contact/?service=${service.slug}`}
+                variant="secondary"
+                icon="arrow-right"
+              >
+                Enquire about this
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Section>
+    ))
+  }
+
+  <Section
+    tone="subtle"
+    eyebrow="Engagement models"
+    title="Three ways to work with us"
+    lead="Whichever shape fits, the commercials stay simple: no minimum bench, no penalty for finishing early."
+  >
+    <ol class="grid gap-5 md:grid-cols-3">
+      {
+        engagementModels.map((model, index) => (
+          <li class="reveal rounded-card border-hairline bg-surface shadow-subtle border p-7">
+            <span class="text-gradient text-2xl font-semibold tabular-nums" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <h3 class="text-ink mt-3 text-lg font-semibold">{model.title}</h3>
+            <p class="text-body mt-2.5 text-[0.9375rem] leading-relaxed">{model.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <CtaBanner
+    title="Not sure which service line you need?"
+    lead="Describe the problem and we will tell you which of these fits — or that none of them do."
+  />
+</BaseLayout>

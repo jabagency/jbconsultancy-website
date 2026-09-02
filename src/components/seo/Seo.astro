@@ -1,0 +1,115 @@
+---
+/**
+ * Everything that belongs in <head> for discoverability and social sharing:
+ * canonical URL, Open Graph, Twitter cards and Organization structured data.
+ *
+ * Kept apart from BaseLayout so the metadata rules live in one auditable place
+ * rather than being threaded through page markup.
+ */
+import { site, isPlaceholder } from '@data/site';
+import { services } from '@data/services';
+import { absoluteUrl } from '@lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Root-relative path of the current page, used for the canonical URL. */
+  path: string;
+  /** Set on the home page only, so the Organization graph is declared once. */
+  includeOrganisation?: boolean;
+  /** Ask crawlers not to index this page (used for 404). */
+  noindex?: boolean;
+}
+
+const { title, description, path, includeOrganisation = false, noindex = false } = Astro.props;
+
+/* Astro.site comes from `site` in astro.config.mjs and is required for sitemap. */
+const origin = Astro.site ?? new URL('http://localhost:4321');
+
+const canonical = absoluteUrl(path, origin);
+const ogImage = absoluteUrl('/og-image.png', origin);
+
+/* Home page uses the bare brand name; every other page is suffixed. */
+const fullTitle = path === '/' ? `${site.name} — ${site.tagline}` : `${title} | ${site.name}`;
+
+const emailReady = !isPlaceholder(site.contact.email);
+
+const organisation = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${origin.origin}/#organization`,
+  name: site.legalName,
+  alternateName: site.name,
+  url: origin.origin,
+  logo: absoluteUrl('/logo.png', origin),
+  image: ogImage,
+  description: site.description,
+  foundingDate: String(site.foundedYear),
+  slogan: site.tagline,
+  address: { '@type': 'PostalAddress', addressCountry: site.contact.country },
+  knowsAbout: [
+    'SAP S/4HANA',
+    'Oracle Database',
+    'Full Stack Engineering',
+    'Machine Learning',
+    'Generative AI',
+    'Technical Recruitment',
+  ],
+  makesOffer: services.map((service) => ({
+    '@type': 'Offer',
+    itemOffered: { '@type': 'Service', name: service.title, description: service.summary },
+  })),
+  // Only advertise a contact point once there is a real address behind it.
+  ...(emailReady
+    ? {
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'sales',
+          email: site.contact.email,
+          ...(site.contact.phone.length > 0 ? { telephone: site.contact.phone } : {}),
+        },
+      }
+    : {}),
+  ...(site.social.length > 0 ? { sameAs: site.social.map((link) => link.href) } : {}),
+};
+
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${origin.origin}/#website`,
+  url: origin.origin,
+  name: site.name,
+  description: site.description,
+  publisher: { '@id': `${origin.origin}/#organization` },
+  inLanguage: 'en',
+};
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{noindex && <meta name="robots" content="noindex, follow" />}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${site.name} — ${site.tagline}`} />
+<meta property="og:locale" content="en" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{
+  includeOrganisation && (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(organisation)} />
+  )
+}
+<script type="application/ld+json" is:inline set:html={JSON.stringify(website)} />

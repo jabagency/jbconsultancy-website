@@ -1,0 +1,128 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Section from '@components/layout/Section.astro';
+import Hero from '@components/sections/Hero.astro';
+import ServiceGrid from '@components/sections/ServiceGrid.astro';
+import StatRow from '@components/sections/StatRow.astro';
+import OrganisationGrid from '@components/sections/OrganisationGrid.astro';
+import CtaBanner from '@components/sections/CtaBanner.astro';
+import Button from '@components/ui/Button.astro';
+import Icon from '@components/ui/Icon.astro';
+import { capabilities } from '@data/capabilities';
+import { clientEngagements, deliveryPartners } from '@data/partners';
+
+const description =
+  'JB Consultancy is an end-to-end consulting partner for fast-scaling platforms and ' +
+  'technology enterprises — specialised staffing, full-cycle project delivery, and SAP, ' +
+  'Oracle, full-stack and AI engineering.';
+
+/** Why-us points. Framed as what we own, not as unverifiable superlatives. */
+const differentiators = [
+  {
+    icon: 'target',
+    title: 'One partner, whole life cycle',
+    body: 'Architecture, design, build, test and deploy sit under a single accountable team, so nothing falls between vendors.',
+  },
+  {
+    icon: 'users',
+    title: 'Talent matched on culture, not just CVs',
+    body: 'We screen for how someone will work inside your organisation alongside assessing whether they can do the job.',
+  },
+  {
+    icon: 'shield-check',
+    title: 'Enterprise standards by default',
+    body: 'Modern security practice, automated testing and performance work are part of delivery rather than a later phase.',
+  },
+] as const;
+---
+
+<BaseLayout title="Home" description={description} includeOrganisation>
+  <Hero />
+
+  <Section
+    id="services"
+    tone="subtle"
+    eyebrow="What we do"
+    title="Four ways we help you move faster"
+    lead="From assembling the team to shipping the system, each engagement is scoped around the outcome you need rather than a fixed set of deliverables."
+  >
+    <ServiceGrid />
+  </Section>
+
+  <Section
+    eyebrow="Why JB Consultancy"
+    title="An extended growth partner, not a body shop"
+    lead="We take responsibility for outcomes. That shapes how we staff engagements, how we scope them, and what we hand over at the end."
+  >
+    <ul class="grid gap-8 md:grid-cols-3">
+      {
+        differentiators.map((item) => (
+          <li class="reveal">
+            <span class="text-accent mb-4 inline-flex" aria-hidden="true">
+              <Icon name={item.icon} size={24} />
+            </span>
+            <h3 class="text-ink text-lg font-semibold">{item.title}</h3>
+            <p class="text-body mt-2.5 text-[0.9375rem] leading-relaxed">{item.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <hr class="rule-fade mt-14 mb-14" />
+
+    <StatRow />
+  </Section>
+
+  <Section
+    tone="subtle"
+    eyebrow="Ecosystem"
+    title="Delivering alongside global integrators"
+    lead="We collaborate with globally recognised technology integrators to deliver enterprise-grade transformation at scale."
+  >
+    <OrganisationGrid organisations={deliveryPartners} />
+
+    <div class="mt-16">
+      <h3 class="text-ink text-display-sm reveal">Selected client engagements</h3>
+      <p class="text-body reveal mt-3 max-w-2xl">
+        Long-running partnerships where we own a specific capability inside the client's
+        organisation.
+      </p>
+      <div class="mt-8">
+        <OrganisationGrid organisations={clientEngagements} />
+      </div>
+    </div>
+  </Section>
+
+  <Section
+    eyebrow="Capabilities"
+    title="Deep bench across the enterprise stack"
+    lead="SAP and Oracle practices alongside modern full-stack and applied AI engineering — so a modernisation programme and a greenfield product can be staffed from the same team."
+  >
+    <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        capabilities.map((capability) => (
+          <li class="reveal rounded-card border-hairline bg-surface shadow-subtle border p-6">
+            <h3 class="text-ink text-[0.9375rem] font-semibold">{capability.area}</h3>
+            {/* A sample of each area rather than the full list — the page this
+                links to carries the complete stack. */}
+            <ul class="mt-4 flex flex-wrap gap-2">
+              {capability.skills.slice(0, 3).map((skill) => (
+                <li class="border-hairline bg-subtle text-body rounded-pill border px-3 py-1 text-xs font-medium">
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="reveal mt-10">
+      <Button href="/capabilities/" variant="secondary" size="lg" icon="arrow-right">
+        See the full technology stack
+      </Button>
+    </div>
+  </Section>
+
+  <CtaBanner />
+</BaseLayout>

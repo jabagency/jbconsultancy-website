@@ -1,0 +1,105 @@
+---
+/**
+ * Home page hero.
+ *
+ * Type-led rather than image-led: the strongest asset here is the proposition,
+ * and a typographic hero also costs nothing to load. The gradient appears once,
+ * on a single word, so it stays an accent rather than decoration.
+ */
+import Container from '@components/layout/Container.astro';
+import Button from '@components/ui/Button.astro';
+import Icon from '@components/ui/Icon.astro';
+import { site } from '@data/site';
+import { capabilities } from '@data/capabilities';
+
+const proofPoints = [
+  { icon: 'shield-check', label: 'Modern security standards' },
+  { icon: 'clock', label: 'On-time delivery' },
+  { icon: 'target', label: 'Culture-matched talent' },
+] as const;
+---
+
+<section class="relative overflow-hidden">
+  <!--
+    Ambient background. Two soft radial washes plus a faint grid, all behind a
+    pointer-events-none layer so they never intercept clicks. Decorative, so
+    hidden from assistive tech.
+  -->
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    <div
+      class="absolute -top-40 -right-32 size-[36rem] rounded-full opacity-[0.13] blur-3xl"
+      style="background: radial-gradient(circle, var(--color-brand-400), transparent 68%)"
+    >
+    </div>
+    <div
+      class="absolute -bottom-56 -left-40 size-[32rem] rounded-full opacity-[0.10] blur-3xl"
+      style="background: radial-gradient(circle, var(--color-brand-700), transparent 68%)"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.028]"
+      style="background-image:
+               linear-gradient(to right, var(--ink) 1px, transparent 1px),
+               linear-gradient(to bottom, var(--ink) 1px, transparent 1px);
+             background-size: 68px 68px;
+             mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black, transparent 72%);"
+    >
+    </div>
+  </div>
+
+  <Container class="pb-section pt-16 md:pt-24">
+    <div class="max-w-3xl">
+      <p
+        class="border-hairline bg-surface/70 text-body reveal rounded-pill inline-flex items-center gap-2 border px-3.5 py-1.5 text-[0.8125rem] font-medium"
+      >
+        <span class="bg-gradient-brand size-1.5 rounded-full" aria-hidden="true"></span>
+        Consulting · Talent · Delivery — since {site.foundedYear}
+      </p>
+
+      <h1 class="text-display-xl text-ink reveal mt-6">
+        Engineering, talent and <span class="text-gradient">delivery</span> for ambitious platforms.
+      </h1>
+
+      <p class="text-lead text-body reveal mt-6 max-w-2xl">
+        JB Consultancy bridges the gap between business vision and execution. We work as an extended
+        growth partner to fast-scaling platforms, fintech disruptors and technology enterprises —
+        sourcing elite talent and shipping production systems end to end.
+      </p>
+
+      <div class="reveal mt-9 flex flex-wrap items-center gap-3">
+        <Button href="/contact/" variant="primary" size="lg" icon="arrow-right">
+          Start a project
+        </Button>
+        <Button href="/services/" variant="secondary" size="lg">Explore services</Button>
+      </div>
+
+      <ul class="reveal mt-10 flex flex-wrap gap-x-7 gap-y-3">
+        {
+          proofPoints.map((point) => (
+            <li class="text-body flex items-center gap-2 text-sm">
+              <Icon name={point.icon} size={17} class="text-accent shrink-0" />
+              {point.label}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- Practice areas, as a compact strip that doubles as an at-a-glance summary. -->
+    <div class="reveal border-hairline mt-16 border-t pt-8 md:mt-20">
+      <h2 class="text-muted text-xs font-semibold tracking-[0.16em] uppercase">
+        Core practice areas
+      </h2>
+      <ul class="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+        {
+          capabilities.map((capability) => (
+            <li>
+              <p class="text-ink text-[0.9375rem] font-semibold">{capability.label}</p>
+              <p class="text-muted mt-0.5 text-[0.8125rem]">{capability.strapline}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Container>
+</section>

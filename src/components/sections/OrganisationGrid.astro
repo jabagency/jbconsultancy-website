@@ -1,0 +1,41 @@
+---
+/**
+ * Partners / client engagements, rendered as typographic wordmarks.
+ *
+ * No image logos: we hold no trademark licence for these marks, and a text
+ * treatment stays sharp at any size and adapts to dark mode for free.
+ */
+import type { Organisation } from '@data/partners';
+
+interface Props {
+  organisations: readonly Organisation[];
+  /** 'detailed' shows the description; 'compact' is a wordmark strip only. */
+  variant?: 'detailed' | 'compact';
+}
+
+const { organisations, variant = 'detailed' } = Astro.props;
+---
+
+{
+  variant === 'compact' ? (
+    <ul class="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+      {organisations.map((org) => (
+        <li class="text-muted reveal hover:text-ink text-2xl font-semibold tracking-[-0.02em] transition-colors duration-300">
+          {org.name}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <ul class="grid gap-5 sm:grid-cols-2">
+      {organisations.map((org) => (
+        <li class="reveal rounded-card border-hairline bg-surface shadow-subtle hover:border-accent/25 hover:shadow-card border p-7 transition-[box-shadow,border-color] duration-300">
+          <p class="text-ink text-xl font-semibold tracking-[-0.02em]">{org.name}</p>
+          <p class="text-accent mt-1 text-xs font-semibold tracking-[0.14em] uppercase">
+            {org.role}
+          </p>
+          <p class="text-body mt-4 text-[0.9375rem] leading-relaxed">{org.description}</p>
+        </li>
+      ))}
+    </ul>
+  )
+}

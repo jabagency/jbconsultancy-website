@@ -1,0 +1,147 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Container from '@components/layout/Container.astro';
+import PageHeader from '@components/sections/PageHeader.astro';
+import ContactForm from '@components/contact/ContactForm.astro';
+import WhatsAppButton from '@components/contact/WhatsAppButton.astro';
+import Icon from '@components/ui/Icon.astro';
+import { site, isPlaceholder } from '@data/site';
+import { formatPhoneForDisplay, isValidPhone } from '@lib/whatsapp';
+
+const description =
+  'Start a conversation with JB Consultancy — send an enquiry by email or open a ' +
+  'WhatsApp chat directly. We reply to every enquiry.';
+
+const emailReady = !isPlaceholder(site.contact.email);
+const phoneReady = !isPlaceholder(site.contact.phone);
+const hasAddress = site.contact.addressLines.length > 0;
+/* Same test WhatsAppButton applies, so the card and the button appear together:
+   offering "message us on WhatsApp" above nothing at all is worse than silence. */
+const whatsappReady = isValidPhone(site.contact.whatsapp);
+const hasDirectChannel = whatsappReady || emailReady || phoneReady || hasAddress;
+
+/** Sets expectations, which is the main thing a contact page owes a visitor. */
+const nextSteps = [
+  'We read every enquiry ourselves — no gatekeeping, no qualification call before a human replies.',
+  'You get a response within one working day, with a straight answer on whether we can help.',
+  'If it looks like a fit, we propose a 30-minute call to scope the outcome and the timeline.',
+] as const;
+---
+
+<BaseLayout title="Contact" description={description}>
+  <PageHeader
+    eyebrow="Contact"
+    title="Let us talk about what you are building"
+    lead="Tell us the outcome you need — a team to hire, a platform to ship, or a system to modernise — and we will come back with a concrete route to get there."
+  />
+
+  <Container class="py-section">
+    <div class="grid gap-14 lg:grid-cols-[1.35fr_1fr] lg:gap-20">
+      {/* Form column */}
+      <div class="reveal">
+        <h2 class="text-display-sm text-ink">Send an enquiry</h2>
+        <p class="text-body mt-3">
+          Fields marked with an asterisk are required. Everything else helps us route your enquiry
+          to the right person faster.
+        </p>
+        <div class="mt-9">
+          <ContactForm />
+        </div>
+      </div>
+
+      {/* Details column */}
+      <aside class="flex flex-col gap-10">
+        {
+          hasDirectChannel && (
+            <div class="reveal rounded-card border-hairline bg-subtle border p-7 md:p-8">
+              {whatsappReady ? (
+                <Fragment>
+                  <h2 class="text-ink text-xl font-semibold">Prefer to message us?</h2>
+                  <p class="text-body mt-2.5 text-[0.9375rem] leading-relaxed">
+                    WhatsApp reaches us directly and is usually the fastest way to get an answer to
+                    a short question.
+                  </p>
+                  <div class="mt-6">
+                    <WhatsAppButton
+                      message={`Hi ${site.name}, I would like to discuss a project.`}
+                      class="w-full sm:w-auto"
+                    />
+                  </div>
+                </Fragment>
+              ) : (
+                <h2 class="text-ink text-xl font-semibold">Other ways to reach us</h2>
+              )}
+
+              <dl class={`${whatsappReady ? 'mt-8' : 'mt-5'} flex flex-col gap-5 text-[0.9375rem]`}>
+                {emailReady && (
+                  <div class="flex items-start gap-3.5">
+                    <dt class="text-accent mt-0.5 shrink-0">
+                      <Icon name="mail" size={18} />
+                      <span class="sr-only">Email</span>
+                    </dt>
+                    <dd>
+                      <a
+                        href={`mailto:${site.contact.email}`}
+                        class="text-ink hover:text-accent font-medium transition-colors duration-200"
+                      >
+                        {site.contact.email}
+                      </a>
+                    </dd>
+                  </div>
+                )}
+                {phoneReady && (
+                  <div class="flex items-start gap-3.5">
+                    <dt class="text-accent mt-0.5 shrink-0">
+                      <Icon name="phone" size={18} />
+                      <span class="sr-only">Phone</span>
+                    </dt>
+                    <dd>
+                      <a
+                        href={`tel:${site.contact.phone}`}
+                        class="text-ink hover:text-accent font-medium transition-colors duration-200"
+                      >
+                        {formatPhoneForDisplay(site.contact.phone)}
+                      </a>
+                    </dd>
+                  </div>
+                )}
+                {hasAddress && (
+                  <div class="flex items-start gap-3.5">
+                    <dt class="text-accent mt-0.5 shrink-0">
+                      <Icon name="map-pin" size={18} />
+                      <span class="sr-only">Address</span>
+                    </dt>
+                    <dd class="text-body not-italic">
+                      {site.contact.addressLines.map((line) => (
+                        <span class="block">{line}</span>
+                      ))}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          )
+        }
+
+        <div class="reveal">
+          <h2 class="text-ink text-xl font-semibold">What happens next</h2>
+          <ol class="mt-5 flex flex-col gap-5">
+            {
+              nextSteps.map((step, index) => (
+                <li class="flex items-start gap-4">
+                  <span
+                    class="bg-gradient-brand text-on-accent mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                    aria-hidden="true"
+                  >
+                    {index + 1}
+                  </span>
+                  <p class="text-body text-[0.9375rem] leading-relaxed">{step}</p>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </Container>
+</BaseLayout>

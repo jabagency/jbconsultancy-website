@@ -1,0 +1,30 @@
+---
+/**
+ * GitHub Pages serves this file for any unmatched path, so it must be a complete
+ * page with working navigation rather than a bare message. `noindex` keeps it out
+ * of search results.
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Container from '@components/layout/Container.astro';
+import Button from '@components/ui/Button.astro';
+import { site } from '@data/site';
+
+const description = 'The page you were looking for could not be found.';
+---
+
+<BaseLayout title="Page not found" description={description} noindex>
+  <Container class="flex min-h-[60vh] flex-col justify-center py-24 text-center">
+    <p class="text-gradient text-display-lg font-semibold" aria-hidden="true">404</p>
+    <h1 class="text-display-md text-ink mt-3">This page could not be found</h1>
+    <p class="text-lead text-body mx-auto mt-4 max-w-xl">
+      The link may be out of date, or the page may have moved. Everything on the site is reachable
+      from the menu above — or start again from one of these.
+    </p>
+
+    <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+      <Button href="/" variant="primary" size="lg" icon="arrow-right">Back to home</Button>
+      <Button href="/services/" variant="secondary" size="lg">Browse services</Button>
+      <Button href="/contact/" variant="ghost" size="lg">Contact {site.shortName}</Button>
+    </div>
+  </Container>
+</BaseLayout>

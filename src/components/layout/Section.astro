@@ -1,0 +1,66 @@
+---
+/**
+ * A vertical page region: consistent rhythm, optional alternating background,
+ * and an optional eyebrow/title/lead header block.
+ *
+ * Alternating `subtle` and `surface` bands are what give the page structure
+ * without needing borders between every region.
+ */
+import Container from './Container.astro';
+
+interface Props {
+  /** Set when the section is an in-page anchor target. */
+  id?: string;
+  /** Small uppercase label above the title. */
+  eyebrow?: string;
+  title?: string;
+  /** Supporting sentence under the title. */
+  lead?: string;
+  tone?: 'surface' | 'subtle';
+  /** Heading level for `title` — keeps the document outline correct. */
+  headingLevel?: 'h2' | 'h3';
+  align?: 'start' | 'center';
+  /** Trim the top padding where a section follows straight on from another. */
+  flushTop?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  eyebrow,
+  title,
+  lead,
+  tone = 'surface',
+  headingLevel: Heading = 'h2',
+  align = 'start',
+  flushTop = false,
+  class: className,
+} = Astro.props;
+
+const toneClass = tone === 'subtle' ? 'bg-subtle' : 'bg-surface';
+const paddingClass = flushTop ? 'pb-section' : 'py-section';
+const alignClass = align === 'center' ? 'mx-auto max-w-3xl text-center' : 'max-w-3xl';
+const hasHeader = Boolean(eyebrow ?? title ?? lead);
+---
+
+<section id={id} class:list={[toneClass, paddingClass, className]}>
+  <Container>
+    {
+      hasHeader && (
+        <div class={`reveal ${alignClass}`}>
+          {eyebrow && (
+            <p class="text-accent mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
+              {eyebrow}
+            </p>
+          )}
+          {title && <Heading class="text-display-md text-ink">{title}</Heading>}
+          {lead && <p class="text-lead text-body mt-4">{lead}</p>}
+        </div>
+      )
+    }
+
+    <div class:list={[hasHeader && 'mt-12 md:mt-16']}>
+      <slot />
+    </div>
+  </Container>
+</section>

@@ -1,0 +1,101 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Section from '@components/layout/Section.astro';
+import PageHeader from '@components/sections/PageHeader.astro';
+import CtaBanner from '@components/sections/CtaBanner.astro';
+import Icon from '@components/ui/Icon.astro';
+import { capabilities } from '@data/capabilities';
+
+const description =
+  'Core technology stack: SAP S/4HANA and ABAP, Oracle database and cloud, modern ' +
+  'full-stack engineering across Node, React, Python, Java and Go, and applied AI.';
+
+/** One icon per practice area, keyed by slug so the data file stays presentation-free. */
+const AREA_ICONS = {
+  'enterprise-applications': 'layers',
+  'database-cloud': 'database',
+  'full-stack': 'code',
+  'ai-next-gen': 'cpu',
+} as const;
+---
+
+<BaseLayout title="Capabilities" description={description}>
+  <PageHeader
+    eyebrow="Capabilities"
+    title="Deep bench across the enterprise stack"
+    lead="Four practice areas, so a legacy modernisation programme and a greenfield product can be staffed from the same team — with people who have run these platforms in production rather than only certified on them."
+  />
+
+  <Section flushTop class="pt-14 md:pt-20">
+    <ul class="flex flex-col gap-6">
+      {
+        capabilities.map((capability) => (
+          <li class="reveal rounded-card border-hairline bg-surface shadow-subtle hover:border-accent/25 hover:shadow-card border p-7 transition-[box-shadow,border-color] duration-300 md:p-9">
+            <div class="grid gap-7 md:grid-cols-[minmax(0,15rem)_1fr] md:gap-12">
+              <div>
+                <span
+                  class="text-accent bg-accent/8 border-accent/15 inline-flex h-11 w-11 items-center justify-center rounded-xl border"
+                  aria-hidden="true"
+                >
+                  <Icon name={AREA_ICONS[capability.slug]} size={22} />
+                </span>
+                <h2 class="text-ink mt-5 text-xl font-semibold tracking-[-0.01em]">
+                  {capability.area}
+                </h2>
+                {capability.platform && (
+                  <p class="text-accent mt-1.5 text-xs font-semibold tracking-[0.14em] uppercase">
+                    {capability.platform}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <p class="text-body text-[1.0625rem] leading-relaxed">{capability.description}</p>
+
+                <h3 class="sr-only">Core specialisations in {capability.area}</h3>
+                <ul class="mt-6 flex flex-wrap gap-2">
+                  {capability.skills.map((skill) => (
+                    <li class="border-hairline bg-subtle text-body rounded-pill border px-3.5 py-1.5 text-[0.8125rem] font-medium">
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section
+    tone="subtle"
+    eyebrow="How we apply it"
+    title="Platform depth, product pace"
+    lead="Enterprise platforms and modern product engineering are usually bought from different firms. Holding both is what lets us integrate them without a systems-integration project in the middle."
+  >
+    <div class="grid gap-8 md:grid-cols-2">
+      <div class="reveal">
+        <h3 class="text-ink text-lg font-semibold">Modernisation without a freeze</h3>
+        <p class="text-body mt-2.5 text-[0.9375rem] leading-relaxed">
+          SAP and Oracle estates carry the business while the new stack is being built. We sequence
+          work so the core keeps running — incremental migration, integration layers and
+          parallel-run validation rather than a big-bang cutover.
+        </p>
+      </div>
+      <div class="reveal">
+        <h3 class="text-ink text-lg font-semibold">AI on top of real data</h3>
+        <p class="text-body mt-2.5 text-[0.9375rem] leading-relaxed">
+          Most AI features fail on data plumbing, not modelling. Because we already work inside the
+          systems where the data lives, we can build the pipelines and the feature on top of them as
+          one piece of work.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <CtaBanner
+    title="Need a specific skill on the ground?"
+    lead="Tell us the platform, the seniority and the timeline. We will come back on availability rather than on capability in the abstract."
+  />
+</BaseLayout>
