@@ -10,7 +10,7 @@ import { site } from '@data/site';
 import { buildWhatsAppUrl } from '@lib/whatsapp';
 
 interface Props {
-  /** Prefilled message. Defaults to a neutral opener. */
+  /** Prefilled message. Defaults to the site-wide opener in site.contact. */
   message?: string;
   label?: string;
   size?: 'md' | 'lg';
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const {
-  message = `Hi ${site.name}, I found you through your website and would like to talk about a project.`,
+  message = site.contact.whatsappMessage,
   label = 'Chat on WhatsApp',
   size = 'lg',
   class: className,

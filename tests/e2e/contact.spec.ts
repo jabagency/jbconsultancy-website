@@ -374,7 +374,11 @@ test.describe('WhatsApp', () => {
       expect(url.origin).toBe('https://wa.me');
       // Digits only: wa.me rejects '+', spaces and dashes with an error page.
       expect(url.pathname.slice(1)).toMatch(/^\d{8,15}$/);
-      expect(url.searchParams.get('text')?.length ?? 0).toBeGreaterThan(0);
+      // Present, but short: the prefill is text the visitor sends as their own,
+      // so a scripted paragraph would have to be deleted before they can type.
+      const text = url.searchParams.get('text') ?? '';
+      expect(text.length).toBeGreaterThan(0);
+      expect(text.length).toBeLessThanOrEqual(40);
 
       await expect(links.nth(index)).toHaveAttribute('target', '_blank');
       await expect(links.nth(index)).toHaveAttribute('rel', /noopener/);

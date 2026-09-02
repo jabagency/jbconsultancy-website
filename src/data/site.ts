@@ -49,6 +49,14 @@ export const site = {
      * number without one.
      */
     whatsapp: '916238602522',
+    /**
+     * Text prefilled in the visitor's WhatsApp composer. Deliberately just a
+     * greeting: a long scripted opener arrives as a template the visitor has to
+     * edit or delete before they can say anything of their own, and it is also
+     * the first message that lands in our inbox. One word opens the chat and
+     * leaves the conversation to them.
+     */
+    whatsappMessage: 'Hi',
     email: 'britto@jbconsultancysolutions.com',
     /** Optional. Leave empty to hide from the UI entirely. */
     phone: '',

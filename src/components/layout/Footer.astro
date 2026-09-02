@@ -18,7 +18,7 @@ const year = new Date().getFullYear();
 const emailReady = !isPlaceholder(site.contact.email);
 const whatsappUrl = buildWhatsAppUrl({
   phone: site.contact.whatsapp,
-  message: `Hi ${site.name}, I would like to discuss a project.`,
+  message: site.contact.whatsappMessage,
 });
 
 const columnHeading = 'text-ink mb-4 text-xs font-semibold tracking-[0.16em] uppercase';

@@ -12,7 +12,7 @@ import { buildWhatsAppUrl } from '@lib/whatsapp';
 
 const url = buildWhatsAppUrl({
   phone: site.contact.whatsapp,
-  message: `Hi ${site.name}, I found you online and would like to discuss a project.`,
+  message: site.contact.whatsappMessage,
 });
 ---
 

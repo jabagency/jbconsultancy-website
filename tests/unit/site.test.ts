@@ -53,6 +53,19 @@ describe('contact configuration', () => {
     }
   });
 
+  it('keeps the WhatsApp prefill short enough to send unedited', () => {
+    const message = site.contact.whatsappMessage;
+
+    // Every WhatsApp button on the site shares this one string, and it arrives
+    // in the visitor's composer as words they are about to send as their own.
+    // A long scripted opener makes them delete a paragraph before they can
+    // type, so the cap is deliberately tight — a greeting, not a pitch.
+    expect(message.trim()).toBe(message);
+    expect(message.length).toBeGreaterThan(0);
+    expect(message.length).toBeLessThanOrEqual(40);
+    expect(message).not.toContain('\n');
+  });
+
   it('an optional phone number, when present, is valid', () => {
     if (site.contact.phone.length > 0) {
       expect(isValidPhone(site.contact.phone)).toBe(true);
