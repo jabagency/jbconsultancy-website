@@ -10,11 +10,13 @@ A five-page static marketing site for JB Consultancy, built with Astro 7 and Tai
 
 All contact configuration in `src/data/site.ts` is real; no placeholders remain:
 
-| Field                | Value                               | Notes                                                                                                    |
-| -------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `contact.whatsapp`   | `916238602522`                      | Digits only, country code first — what `wa.me` requires.                                                 |
-| `contact.email`      | `britto@jbconsultancysolutions.com` | Also the address the Web3Forms key delivers to.                                                          |
-| `forms.web3formsKey` | `5e0c0e3f-…`                        | Public by design: it ships in the client bundle and can only deliver to the address it was verified for. |
+| Field                | Value                       | Notes                                                                                                    |
+| -------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `contact.whatsapp`   | `916238602522`              | Digits only, country code first — what `wa.me` requires.                                                 |
+| `contact.email`      | `brito@jbconsultancies.net` | Shown in the footer and contact page, and used for `mailto:` links.                                      |
+| `forms.web3formsKey` | `5e0c0e3f-…`                | Public by design: it ships in the client bundle and can only deliver to the address it was verified for. |
+
+> **The access key is bound to an address, not to `contact.email` and not to a domain.** This key was issued against `britto@jbconsultancysolutions.com`, so form submissions still arrive there. To move them, create a new key at <https://web3forms.com/#start> using `brito@jbconsultancies.net`, confirm the verification email, and replace `forms.web3formsKey`.
 
 The `go-live readiness` block in `tests/unit/site.test.ts` enforces all three — emptying one fails `npm test` rather than silently degrading the site (WhatsApp buttons disappear; the contact form falls back to a `mailto:` composer). Spam on the form is handled by the `botcheck` honeypot in `ContactForm.astro`.
 

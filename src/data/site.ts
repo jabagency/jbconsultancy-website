@@ -57,7 +57,7 @@ export const site = {
      * leaves the conversation to them.
      */
     whatsappMessage: 'Hi',
-    email: 'britto@jbconsultancysolutions.com',
+    email: 'brito@jbconsultancies.net',
     /** Optional. Leave empty to hide from the UI entirely. */
     phone: '',
     addressLines: [] as readonly string[],
@@ -67,11 +67,16 @@ export const site = {
 
   forms: {
     /**
-     * Web3Forms access key, issued against contact.email. Public by design — it
-     * ships in the client bundle and can only ever deliver to the address it was
-     * verified for, so exposure lets someone email us, not redirect our mail.
-     * While empty the contact form degrades to a `mailto:` composer instead of
-     * silently failing to deliver.
+     * Web3Forms access key. Public by design — it ships in the client bundle and
+     * can only ever deliver to the address it was verified for, so exposure lets
+     * someone email us, not redirect our mail. While empty the contact form
+     * degrades to a `mailto:` composer instead of silently failing to deliver.
+     *
+     * That binding is also the catch: the key is tied to the address it was
+     * issued against, NOT to contact.email above and not to a domain. Changing
+     * contact.email changes where `mailto:` links and the footer point, but form
+     * submissions keep arriving at the original inbox until a key verified
+     * against the new address replaces this one.
      */
     web3formsKey: '5e0c0e3f-49d8-4fac-8bc2-401c9e5054f8',
     endpoint: 'https://api.web3forms.com/submit',
