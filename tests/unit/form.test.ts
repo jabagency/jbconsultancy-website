@@ -12,6 +12,7 @@ import {
 const validValues: ContactFormValues = {
   name: 'Priya Raman',
   email: 'priya@finlane.com',
+  phone: '+91 98765 43210',
   company: 'Finlane',
   service: 'e2e-delivery',
   message: 'We need help scaling our payments platform ahead of a launch next quarter.',
@@ -100,6 +101,45 @@ describe('validateContact', () => {
     expect(result.errors.message).toMatch(/under 2000 characters/i);
   });
 
+  it.each([
+    ['an international number with spaces', '+91 98765 43210'],
+    ['bare digits', '919876543210'],
+    ['brackets and dashes', '+1 (415) 555-0198'],
+    ['dots as separators', '+44.20.7946.0958'],
+    ['the shortest plausible number', '12345678'],
+  ])('accepts %s as a phone number', (_label, phone) => {
+    expect(validateContact(withValues({ phone })).errors.phone).toBeUndefined();
+  });
+
+  it('requires a phone number', () => {
+    expect(validateContact(withValues({ phone: '' })).errors.phone).toMatch(/enter your phone/i);
+    // Whitespace is not an answer: it would submit an unreachable enquiry.
+    expect(validateContact(withValues({ phone: '   ' })).errors.phone).toMatch(/enter your phone/i);
+  });
+
+  it('rejects a phone number that is not made of digits', () => {
+    // Reported as a character problem, not a length one — 'call me' strips to
+    // zero digits, so a digit-count message would read as nonsense.
+    expect(validateContact(withValues({ phone: 'call me' })).errors.phone).toMatch(/digits/i);
+    expect(validateContact(withValues({ phone: '98765 ext. four' })).errors.phone).toMatch(
+      /digits/i,
+    );
+  });
+
+  it('rejects a phone number with too few or too many digits', () => {
+    expect(validateContact(withValues({ phone: '12345' })).errors.phone).toMatch(
+      /complete number/i,
+    );
+    expect(validateContact(withValues({ phone: '1234567890123456' })).errors.phone).toMatch(
+      /complete number/i,
+    );
+  });
+
+  it('rejects a phone number longer than the field allows', () => {
+    const result = validateContact(withValues({ phone: '1'.repeat(LIMITS.phone.max + 1) }));
+    expect(result.errors.phone).toMatch(/under 24 characters/i);
+  });
+
   it('treats company as optional but length-capped', () => {
     expect(validateContact(withValues({ company: '' })).valid).toBe(true);
     expect(
@@ -111,12 +151,13 @@ describe('validateContact', () => {
     const result = validateContact({
       name: '',
       email: 'bad',
+      phone: '',
       company: '',
       service: '',
       message: 'short',
     });
 
-    expect(Object.keys(result.errors).sort()).toEqual(['email', 'message', 'name']);
+    expect(Object.keys(result.errors).sort()).toEqual(['email', 'message', 'name', 'phone']);
   });
 });
 
@@ -146,13 +187,20 @@ describe('buildSubmissionPayload', () => {
 
   it('trims user input before sending', () => {
     const payload = buildSubmissionPayload(
-      withValues({ name: '  Priya Raman  ', email: '  priya@finlane.com  ' }),
+      withValues({ name: '  Priya Raman  ', email: '  priya@finlane.com  ', phone: '  +91 1  ' }),
       'k',
       'JB',
     );
 
     expect(payload.name).toBe('Priya Raman');
     expect(payload.email).toBe('priya@finlane.com');
+    expect(payload.phone).toBe('+91 1');
+  });
+
+  it('carries the phone number, which is the point of collecting it', () => {
+    // Sent as typed rather than normalised: the separators are how the visitor
+    // reads their own number back, and whoever calls needs it legible.
+    expect(buildSubmissionPayload(validValues, 'k', 'JB').phone).toBe('+91 98765 43210');
   });
 });
 
@@ -163,6 +211,9 @@ describe('buildMailtoFallback', () => {
     expect(url.startsWith('mailto:hello@jb.com?')).toBe(true);
     expect(decodeURIComponent(url)).toContain('Priya Raman');
     expect(decodeURIComponent(url)).toContain(validValues.message);
+    // The fallback must carry every collected field, or switching branches
+    // silently drops the phone number the form insisted on.
+    expect(decodeURIComponent(url)).toContain('Phone: +91 98765 43210');
   });
 
   it('encodes spaces as %20, which mail clients handle correctly', () => {

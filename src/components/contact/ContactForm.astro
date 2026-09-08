@@ -92,6 +92,28 @@ const errorClass = 'text-sm text-red-600 dark:text-red-400 min-h-0';
 
   <div class="grid gap-5 sm:grid-cols-2">
     <div class={fieldWrap}>
+      <label for="phone" class={labelClass}>
+        Phone number <span class="text-red-600 dark:text-red-400" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="phone"
+        name="phone"
+        type="tel"
+        required
+        inputmode="tel"
+        autocomplete="tel"
+        maxlength={LIMITS.phone.max}
+        placeholder="+91 98765 43210"
+        aria-describedby="phone-error phone-hint"
+        class={controlClass}
+      />
+      <p id="phone-error" class={errorClass} data-error-for="phone"></p>
+      <p id="phone-hint" class="text-muted text-xs">
+        Include your country code so we can call back.
+      </p>
+    </div>
+
+    <div class={fieldWrap}>
       <label for="company" class={labelClass}>Company</label>
       <input
         id="company"
@@ -105,15 +127,17 @@ const errorClass = 'text-sm text-red-600 dark:text-red-400 min-h-0';
       />
       <p id="company-error" class={errorClass} data-error-for="company"></p>
     </div>
+  </div>
 
-    <div class={fieldWrap}>
-      <label for="service" class={labelClass}>What do you need help with?</label>
-      <select id="service" name="service" class={controlClass}>
-        <option value="">Select a service…</option>
-        {services.map((service) => <option value={service.slug}>{service.title}</option>)}
-        <option value="other">Something else</option>
-      </select>
-    </div>
+  <!-- Full width rather than a third cell: an odd number of fields in a two-column
+       grid leaves a visible gap, and the select is the widest control here. -->
+  <div class={fieldWrap}>
+    <label for="service" class={labelClass}>What do you need help with?</label>
+    <select id="service" name="service" class={controlClass}>
+      <option value="">Select a service…</option>
+      {services.map((service) => <option value={service.slug}>{service.title}</option>)}
+      <option value="other">Something else</option>
+    </select>
   </div>
 
   <div class={fieldWrap}>
@@ -216,6 +240,7 @@ const errorClass = 'text-sm text-red-600 dark:text-red-400 min-h-0';
       return {
         name: get('name'),
         email: get('email'),
+        phone: get('phone'),
         company: get('company'),
         service: get('service'),
         message: get('message'),
@@ -238,7 +263,7 @@ const errorClass = 'text-sm text-red-600 dark:text-red-400 min-h-0';
     const renderErrors = (errors: Record<string, string | undefined>): HTMLElement | null => {
       let firstInvalid: HTMLElement | null = null;
 
-      for (const field of ['name', 'email', 'company', 'message']) {
+      for (const field of ['name', 'email', 'phone', 'company', 'message']) {
         const control = form.querySelector<HTMLElement>(`[name="${field}"]`);
         const slot = form.querySelector<HTMLElement>(`[data-error-for="${field}"]`);
         const message = errors[field];

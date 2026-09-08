@@ -16,6 +16,7 @@ const TEST_ACCESS_KEY = 'e2e-test-access-key';
 const VALID = {
   name: 'Priya Raman',
   email: 'priya@example.com',
+  phone: '+91 98765 43210',
   company: 'Finlane',
   message: 'We need two senior Node engineers embedded with our payments squad from October.',
 } as const;
@@ -24,6 +25,7 @@ const VALID = {
 async function fillValidEnquiry(page: Page): Promise<void> {
   await page.fill('#name', VALID.name);
   await page.fill('#email', VALID.email);
+  await page.fill('#phone', VALID.phone);
   await page.fill('#company', VALID.company);
   await page.fill('#message', VALID.message);
 }
@@ -55,6 +57,7 @@ test.describe('form structure', () => {
     for (const [id, label] of [
       ['#name', /full name/i],
       ['#email', /work email/i],
+      ['#phone', /phone number/i],
       ['#company', /company/i],
       ['#service', /what do you need help with/i],
       ['#message', /how can we help/i],
@@ -133,14 +136,34 @@ test.describe('validation', () => {
 
     await expect(page.locator('#name-error')).not.toBeEmpty();
     await expect(page.locator('#email-error')).not.toBeEmpty();
+    await expect(page.locator('#phone-error')).not.toBeEmpty();
     await expect(page.locator('#message-error')).not.toBeEmpty();
 
     await expect(page.locator('#name')).toHaveAttribute('aria-invalid', 'true');
     await expect(page.locator('#email')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#phone')).toHaveAttribute('aria-invalid', 'true');
     await expect(page.locator('#message')).toHaveAttribute('aria-invalid', 'true');
 
     // Company is optional, so it must not be flagged.
     await expect(page.locator('#company')).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  test('the phone field is marked required in the markup, not only in script', async ({ page }) => {
+    // The asterisk is aria-hidden decoration; `required` is what assistive tech
+    // announces, so a field that only fails in JS reads as optional.
+    await expect(page.locator('#phone')).toHaveAttribute('required', '');
+    await expect(page.locator('#phone')).toHaveAttribute('type', 'tel');
+  });
+
+  test('an incomplete phone number is rejected on its own', async ({ page }) => {
+    await fillValidEnquiry(page);
+    await page.fill('#phone', '12345');
+    await page.click('#contact-submit');
+
+    await expect(page.locator('#phone-error')).toContainText(/complete number/i);
+    await expect(page.locator('#phone')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#name-error')).toBeEmpty();
+    await expect(page.locator('#message-error')).toBeEmpty();
   });
 
   test('focus moves to the first invalid field', async ({ page }) => {
@@ -245,10 +268,12 @@ test.describe('Web3Forms submission', () => {
     expect(payload.access_key).toBe(TEST_ACCESS_KEY);
     expect(payload.email).toBe(VALID.email);
     expect(payload.name).toBe(VALID.name);
+    expect(payload.phone).toBe(VALID.phone);
     expect(String(payload.message)).toContain('payments squad');
 
     // Cleared, so a double submit cannot resend the same enquiry.
     await expect(page.locator('#name')).toHaveValue('');
+    await expect(page.locator('#phone')).toHaveValue('');
     await expect(page.locator('#message')).toHaveValue('');
     await expect(page.locator('[data-char-count]')).toHaveText('0');
   });

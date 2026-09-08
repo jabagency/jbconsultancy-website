@@ -4,10 +4,12 @@
  * Deliberately free of DOM access so it can be unit-tested directly and reused
  * by the browser island in ContactForm.astro without a rendering step.
  */
+import { isValidPhone } from '@lib/whatsapp';
 
 export interface ContactFormValues {
   readonly name: string;
   readonly email: string;
+  readonly phone: string;
   readonly company: string;
   readonly service: string;
   readonly message: string;
@@ -28,6 +30,13 @@ export interface ValidationResult {
 export const LIMITS = {
   name: { min: 2, max: 80 },
   email: { max: 254 },
+  /**
+   * Cap on the typed string, not on the digit count — the number itself is
+   * checked with `isValidPhone` (8–15 digits, per ITU-T E.164). The allowance
+   * above 15 leaves room for the separators people naturally type, as in
+   * '+91 (98765) 43210'.
+   */
+  phone: { max: 24 },
   company: { max: 120 },
   message: { min: 20, max: 2000 },
 } as const;
@@ -44,6 +53,14 @@ export function isValidEmail(email: string): boolean {
   const trimmed = email.trim();
   return trimmed.length <= LIMITS.email.max && EMAIL_PATTERN.test(trimmed);
 }
+
+/**
+ * Characters a phone number may legitimately contain. Checked before the digit
+ * count so that 'call me' fails with "use digits" rather than with a length
+ * complaint — `isValidPhone` strips non-digits, so on its own it would report a
+ * confusing error for input that was never a number at all.
+ */
+const PHONE_PATTERN = /^\+?[\d\s().-]+$/;
 
 export function validateContact(values: ContactFormValues): ValidationResult {
   // A filled honeypot short-circuits everything: we report "valid" so the caller
@@ -67,6 +84,19 @@ export function validateContact(values: ContactFormValues): ValidationResult {
     errors.email = 'Please enter your email address.';
   } else if (!isValidEmail(values.email)) {
     errors.email = 'Please enter a valid email address, for example name@company.com.';
+  }
+
+  const phone = values.phone.trim();
+  if (phone.length === 0) {
+    errors.phone = 'Please enter your phone number.';
+  } else if (phone.length > LIMITS.phone.max) {
+    errors.phone = `Please keep your phone number under ${LIMITS.phone.max} characters.`;
+  } else if (!PHONE_PATTERN.test(phone)) {
+    errors.phone = 'Please use digits only, with optional spaces, +, ( ) or -.';
+  } else if (!isValidPhone(phone)) {
+    // 8–15 digits. The usual failure is a local number typed without a country
+    // code, which we cannot dial, so the message names that explicitly.
+    errors.phone = 'Please enter a complete number, including your country code.';
   }
 
   if (company.length > LIMITS.company.max) {
@@ -94,6 +124,7 @@ export function buildSubmissionPayload(
     from_name: siteName,
     name: values.name.trim(),
     email: values.email.trim(),
+    phone: values.phone.trim(),
     company: values.company.trim() || 'Not provided',
     service: values.service || 'Not specified',
     message: values.message.trim(),
@@ -114,6 +145,7 @@ export function buildMailtoFallback(
   const lines = [
     `Name: ${values.name.trim()}`,
     `Email: ${values.email.trim()}`,
+    `Phone: ${values.phone.trim()}`,
     `Company: ${values.company.trim() || 'Not provided'}`,
     `Service of interest: ${values.service || 'Not specified'}`,
     '',
